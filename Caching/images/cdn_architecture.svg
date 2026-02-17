@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="100%" style="stop-color:#24243e"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="400" fill="url(#bgd)" rx="15"/>
+  <text x="450" y="35" text-anchor="middle" fill="#fff" font-size="22" font-weight="bold">🌍 CDN Architecture — How Content is Delivered</text>
+
+  <!-- Users -->
+  <rect x="30" y="80" width="100" height="50" rx="10" fill="#667eea"/>
+  <text x="80" y="110" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">👤 User USA</text>
+
+  <rect x="30" y="250" width="100" height="50" rx="10" fill="#667eea"/>
+  <text x="80" y="280" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">👤 User EU</text>
+
+  <!-- CDN Edge Servers -->
+  <rect x="200" y="70" width="120" height="70" rx="10" fill="#f5576c"/>
+  <text x="260" y="95" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">CDN Edge</text>
+  <text x="260" y="115" text-anchor="middle" fill="#ddd" font-size="10">🇺🇸 USA</text>
+  <text x="260" y="130" text-anchor="middle" fill="#ddd" font-size="9">Cache: MISS ❌</text>
+
+  <rect x="200" y="240" width="120" height="70" rx="10" fill="#43e97b"/>
+  <text x="260" y="265" text-anchor="middle" fill="#1a1a2e" font-size="12" font-weight="bold">CDN Edge</text>
+  <text x="260" y="285" text-anchor="middle" fill="#333" font-size="10">🇪🇺 Europe</text>
+  <text x="260" y="300" text-anchor="middle" fill="#333" font-size="9">Cache: HIT ✅</text>
+
+  <!-- Arrows user to CDN -->
+  <line x1="130" y1="105" x2="200" y2="105" stroke="#4facfe" stroke-width="2"/>
+  <text x="165" y="98" fill="#4facfe" font-size="9">①</text>
+  <line x1="130" y1="275" x2="200" y2="275" stroke="#4facfe" stroke-width="2"/>
+  <text x="165" y="268" fill="#4facfe" font-size="9">①</text>
+
+  <!-- Origin Server -->
+  <rect x="420" y="140" width="160" height="80" rx="12" fill="#fee140"/>
+  <text x="500" y="170" text-anchor="middle" fill="#333" font-size="14" font-weight="bold">🏢 Origin Server</text>
+  <text x="500" y="190" text-anchor="middle" fill="#555" font-size="10">Cloudflare/AWS</text>
+  <text x="500" y="205" text-anchor="middle" fill="#555" font-size="9">Source of truth</text>
+
+  <!-- CDN USA to Origin (miss) -->
+  <line x1="320" y1="105" x2="420" y2="165" stroke="#f5576c" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="365" y="125" fill="#f5576c" font-size="9">② Fetch</text>
+
+  <line x1="420" y1="175" x2="320" y2="110" stroke="#43e97b" stroke-width="1.5"/>
+  <text x="355" y="150" fill="#43e97b" font-size="9">③ Cache &amp; Return</text>
+
+  <!-- CDN EU returns directly (hit) -->
+  <line x1="200" y1="275" x2="130" y2="275" stroke="#43e97b" stroke-width="2"/>
+  <text x="165" y="290" fill="#43e97b" font-size="9">② Return instantly!</text>
+
+  <!-- Global CDN nodes -->
+  <rect x="650" y="60" width="220" height="300" rx="12" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)"/>
+  <text x="760" y="90" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">CDN Providers</text>
+
+  <text x="670" y="120" fill="#4facfe" font-size="11">☁️ Cloudflare — 275K+ servers</text>
+  <text x="670" y="145" fill="#f093fb" font-size="11">☁️ AWS CloudFront — Global</text>
+  <text x="670" y="170" fill="#fee140" font-size="11">☁️ Akamai — Enterprise</text>
+  <text x="670" y="195" fill="#43e97b" font-size="11">☁️ Google Cloud CDN</text>
+  <text x="670" y="220" fill="#f5576c" font-size="11">☁️ Fastly — Dev friendly</text>
+
+  <text x="670" y="260" fill="#fff" font-size="12" font-weight="bold">Key Benefits:</text>
+  <text x="670" y="280" fill="#aaa" font-size="11">✅ Reduced latency globally</text>
+  <text x="670" y="298" fill="#aaa" font-size="11">✅ DDoS protection</text>
+  <text x="670" y="316" fill="#aaa" font-size="11">✅ Lower origin load</text>
+  <text x="670" y="334" fill="#aaa" font-size="11">✅ Auto-scaling capacity</text>
+
+  <!-- Bottom note -->
+  <text x="450" y="385" text-anchor="middle" fill="#667eea" font-size="12" font-weight="bold">DNS resolves to nearest CDN edge via GeoDNS or Anycast routing</text>
+</svg>

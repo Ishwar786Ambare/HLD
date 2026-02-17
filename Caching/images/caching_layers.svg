@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="50%" style="stop-color:#302b63"/>
+      <stop offset="100%" style="stop-color:#24243e"/>
+    </linearGradient>
+    <linearGradient id="layer1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="layer2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f093fb"/>
+      <stop offset="100%" style="stop-color:#f5576c"/>
+    </linearGradient>
+    <linearGradient id="layer3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4facfe"/>
+      <stop offset="100%" style="stop-color:#00f2fe"/>
+    </linearGradient>
+    <linearGradient id="layer4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="layer5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fa709a"/>
+      <stop offset="100%" style="stop-color:#fee140"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="700" fill="url(#bg)" rx="15"/>
+  
+  <!-- Title -->
+  <text x="450" y="45" text-anchor="middle" fill="#fff" font-size="26" font-weight="bold">🏗️ Multi-Layer Caching Architecture</text>
+  <text x="450" y="70" text-anchor="middle" fill="#aaa" font-size="14">Request flows through multiple cache layers before hitting the database</text>
+
+  <!-- Layer 1: Browser Cache -->
+  <rect x="200" y="90" width="500" height="70" rx="12" fill="url(#layer1)" filter="url(#shadow)" opacity="0.95"/>
+  <text x="230" y="118" fill="#fff" font-size="13" font-weight="bold">🌐 LAYER 1: Browser Cache (Client-Side)</text>
+  <text x="230" y="140" fill="#ddd" font-size="12">HTML, CSS, JS, Images, Cookies │ Latency: ~0ms</text>
+  <text x="770" y="130" fill="#fff" font-size="11" font-weight="bold">⚡ Fastest</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="160" x2="450" y2="185" stroke="#667eea" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="445,185 455,185 450,195" fill="#667eea"/>
+  <text x="470" y="180" fill="#888" font-size="10">Cache Miss ↓</text>
+
+  <!-- Layer 2: CDN -->
+  <rect x="200" y="195" width="500" height="70" rx="12" fill="url(#layer2)" filter="url(#shadow)" opacity="0.95"/>
+  <text x="230" y="223" fill="#fff" font-size="13" font-weight="bold">🌍 LAYER 2: CDN (Content Delivery Network)</text>
+  <text x="230" y="245" fill="#ddd" font-size="12">Static Assets, Edge Cached APIs │ Latency: 10-50ms</text>
+  <text x="770" y="235" fill="#fff" font-size="11" font-weight="bold">🌎 Global</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="265" x2="450" y2="290" stroke="#f5576c" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="445,290 455,290 450,300" fill="#f5576c"/>
+  <text x="470" y="285" fill="#888" font-size="10">Cache Miss ↓</text>
+
+  <!-- Layer 3: Load Balancer -->
+  <rect x="200" y="300" width="500" height="70" rx="12" fill="url(#layer3)" filter="url(#shadow)" opacity="0.95"/>
+  <text x="230" y="328" fill="#fff" font-size="13" font-weight="bold">⚖️ LAYER 3: Load Balancer Cache</text>
+  <text x="230" y="350" fill="#ddd" font-size="12">API Response Cache, Session Routing │ Latency: 1-5ms</text>
+  <text x="770" y="340" fill="#fff" font-size="11" font-weight="bold">🔀 Routes</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="370" x2="450" y2="395" stroke="#4facfe" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="445,395 455,395 450,405" fill="#4facfe"/>
+  <text x="470" y="390" fill="#888" font-size="10">Cache Miss ↓</text>
+
+  <!-- Layer 4: Application Cache -->
+  <rect x="200" y="405" width="500" height="70" rx="12" fill="url(#layer4)" filter="url(#shadow)" opacity="0.95"/>
+  <text x="230" y="433" fill="#1a1a2e" font-size="13" font-weight="bold">🔧 LAYER 4: Application Cache (Redis/Memcached)</text>
+  <text x="230" y="455" fill="#333" font-size="12">Query Results, Computed Data, Sessions │ Latency: 1-5ms</text>
+  <text x="770" y="445" fill="#1a1a2e" font-size="11" font-weight="bold">⭐ Key Layer</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="475" x2="450" y2="500" stroke="#43e97b" stroke-width="2" stroke-dasharray="6,3"/>
+  <polygon points="445,500 455,500 450,510" fill="#43e97b"/>
+  <text x="470" y="495" fill="#888" font-size="10">Cache Miss ↓</text>
+
+  <!-- Layer 5: Database -->
+  <rect x="200" y="510" width="500" height="70" rx="12" fill="url(#layer5)" filter="url(#shadow)" opacity="0.95"/>
+  <text x="230" y="538" fill="#1a1a2e" font-size="13" font-weight="bold">💾 LAYER 5: Database (Source of Truth)</text>
+  <text x="230" y="560" fill="#333" font-size="12">Disk Storage, Query Cache, Buffer Pool │ Latency: 10-100ms</text>
+  <text x="770" y="545" fill="#1a1a2e" font-size="11" font-weight="bold">🐢 Slowest</text>
+
+  <!-- Speed Arrow on left -->
+  <line x1="170" y1="120" x2="170" y2="550" stroke="#fff" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="100" y="200" fill="#4facfe" font-size="12" font-weight="bold" transform="rotate(-90, 100, 280)">FASTER ← → SLOWER</text>
+
+  <!-- Bottom Legend -->
+  <rect x="200" y="610" width="500" height="75" rx="10" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)"/>
+  <text x="450" y="635" text-anchor="middle" fill="#ccc" font-size="13" font-weight="bold">📊 Key Insight</text>
+  <text x="450" y="655" text-anchor="middle" fill="#aaa" font-size="12">Each layer reduces load on the next. A 90% hit rate at Layer 4</text>
+  <text x="450" y="672" text-anchor="middle" fill="#aaa" font-size="12">means only 10% of requests reach the database!</text>
+</svg>

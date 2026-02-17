@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="100%" style="stop-color:#24243e"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="500" fill="url(#bgc)" rx="15"/>
+  <text x="450" y="40" text-anchor="middle" fill="#fff" font-size="24" font-weight="bold">🔄 Consistent Hashing Ring</text>
+  <text x="450" y="62" text-anchor="middle" fill="#888" font-size="13">Distributing cache keys across servers with minimal disruption</text>
+
+  <!-- Hash Ring -->
+  <circle cx="300" cy="280" r="170" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
+  <circle cx="300" cy="280" r="170" fill="none" stroke="rgba(102,126,234,0.3)" stroke-width="1" stroke-dasharray="8,4"/>
+
+  <!-- Server S1 (top-right) -->
+  <circle cx="435" cy="165" r="22" fill="#667eea"/>
+  <text x="435" y="170" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">S1</text>
+  <text x="470" y="155" fill="#667eea" font-size="10">Server 1</text>
+
+  <!-- Server S2 (left) -->
+  <circle cx="135" cy="225" r="22" fill="#f093fb"/>
+  <text x="135" y="230" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">S2</text>
+  <text x="95" y="215" fill="#f093fb" font-size="10">Server 2</text>
+
+  <!-- Server S3 (bottom) -->
+  <circle cx="300" cy="450" r="22" fill="#43e97b"/>
+  <text x="300" y="455" text-anchor="middle" fill="#1a1a2e" font-size="12" font-weight="bold">S3</text>
+  <text x="340" y="460" fill="#43e97b" font-size="10">Server 3</text>
+
+  <!-- Keys -->
+  <rect x="385" y="300" width="50" height="22" rx="6" fill="#fee140"/>
+  <text x="410" y="316" text-anchor="middle" fill="#333" font-size="10" font-weight="bold">K1</text>
+  <line x1="395" y1="300" x2="435" y2="187" stroke="#fee140" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="435" y="200" fill="#fee140" font-size="9">→ maps to S1</text>
+
+  <rect x="155" y="380" width="50" height="22" rx="6" fill="#4facfe"/>
+  <text x="180" y="396" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">K2</text>
+  <line x1="175" y1="402" x2="295" y2="448" stroke="#4facfe" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="215" y="430" fill="#4facfe" font-size="9">→ maps to S3</text>
+
+  <rect x="145" y="310" width="50" height="22" rx="6" fill="#fa709a"/>
+  <text x="170" y="326" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">K3</text>
+  <line x1="160" y1="310" x2="140" y2="247" stroke="#fa709a" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Clockwise arrow -->
+  <text x="300" y="280" text-anchor="middle" fill="#888" font-size="11">↻ Clockwise</text>
+  <text x="300" y="295" text-anchor="middle" fill="#888" font-size="10">lookup</text>
+
+  <!-- Right side explanation -->
+  <rect x="530" y="90" width="340" height="380" rx="12" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)"/>
+  <text x="700" y="120" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">How It Works</text>
+
+  <text x="550" y="150" fill="#fee140" font-size="12" font-weight="bold">1. Place Servers on Ring</text>
+  <text x="560" y="168" fill="#aaa" font-size="11">Hash each server → position on ring</text>
+
+  <text x="550" y="198" fill="#4facfe" font-size="12" font-weight="bold">2. Place Keys on Ring</text>
+  <text x="560" y="216" fill="#aaa" font-size="11">Hash each key → position on ring</text>
+
+  <text x="550" y="246" fill="#43e97b" font-size="12" font-weight="bold">3. Find Server (Clockwise)</text>
+  <text x="560" y="264" fill="#aaa" font-size="11">Key → next server clockwise</text>
+
+  <text x="550" y="300" fill="#f093fb" font-size="12" font-weight="bold">Adding Server S4:</text>
+  <text x="560" y="318" fill="#aaa" font-size="11">• Only K/N keys need to move</text>
+  <text x="560" y="336" fill="#aaa" font-size="11">• Other keys stay on same server</text>
+  <text x="560" y="354" fill="#43e97b" font-size="11">• Minimal disruption! ✅</text>
+
+  <text x="550" y="388" fill="#667eea" font-size="12" font-weight="bold">Virtual Nodes:</text>
+  <text x="560" y="406" fill="#aaa" font-size="11">S1 → {S1-v1, S1-v2, ... S1-v100}</text>
+  <text x="560" y="424" fill="#aaa" font-size="11">Ensures even load distribution</text>
+
+  <text x="550" y="455" fill="#f5576c" font-size="12" font-weight="bold">Traditional hash(key) % N:</text>
+  <text x="560" y="470" fill="#f5576c" font-size="11">❌ Adding server = ALL keys redistribute!</text>
+</svg>

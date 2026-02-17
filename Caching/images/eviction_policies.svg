@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="100%" style="stop-color:#24243e"/>
+    </linearGradient>
+    <filter id="she"><feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/></filter>
+  </defs>
+
+  <rect width="900" height="650" fill="url(#bge)" rx="15"/>
+  <text x="450" y="40" text-anchor="middle" fill="#fff" font-size="24" font-weight="bold">🗑️ Cache Eviction Policies</text>
+  <text x="450" y="62" text-anchor="middle" fill="#888" font-size="13">When cache is full, which data should be removed?</text>
+
+  <!-- LRU Section -->
+  <rect x="30" y="85" width="410" height="240" rx="12" fill="rgba(102,126,234,0.1)" stroke="rgba(102,126,234,0.4)"/>
+  <text x="235" y="115" text-anchor="middle" fill="#667eea" font-size="18" font-weight="bold">🔄 LRU — Least Recently Used</text>
+  <text x="235" y="135" text-anchor="middle" fill="#aaa" font-size="12">⭐ Most Common — Evicts oldest accessed item</text>
+
+  <!-- LRU items with timestamps -->
+  <rect x="55" y="155" width="75" height="45" rx="8" fill="#667eea" filter="url(#she)"/>
+  <text x="92" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Item A</text>
+  <text x="92" y="192" text-anchor="middle" fill="#ddd" font-size="10">5s ago</text>
+
+  <rect x="140" y="155" width="75" height="45" rx="8" fill="#667eea" filter="url(#she)"/>
+  <text x="177" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Item B</text>
+  <text x="177" y="192" text-anchor="middle" fill="#ddd" font-size="10">2s ago</text>
+
+  <rect x="225" y="155" width="75" height="45" rx="8" fill="#667eea" filter="url(#she)"/>
+  <text x="262" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Item C</text>
+  <text x="262" y="192" text-anchor="middle" fill="#ddd" font-size="10">10s ago</text>
+
+  <rect x="310" y="155" width="75" height="45" rx="8" fill="#f5576c" filter="url(#she)" stroke="#ff0" stroke-width="2"/>
+  <text x="347" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Item D</text>
+  <text x="347" y="192" text-anchor="middle" fill="#fff" font-size="10">30s ago</text>
+
+  <!-- LRU eviction arrow -->
+  <text x="347" y="220" text-anchor="middle" fill="#f5576c" font-size="11">↑ EVICT!</text>
+  <text x="347" y="235" text-anchor="middle" fill="#f5576c" font-size="10">(Least Recent)</text>
+
+  <rect x="55" y="250" width="360" height="60" rx="8" fill="rgba(255,255,255,0.03)"/>
+  <text x="65" y="272" fill="#43e97b" font-size="11">✅ Great for most workloads</text>
+  <text x="65" y="290" fill="#43e97b" font-size="11">✅ O(1) with HashMap + Doubly Linked List</text>
+  <text x="260" y="272" fill="#f5576c" font-size="11">❌ Ignores frequency</text>
+  <text x="260" y="290" fill="#888" font-size="11">📌 Redis: allkeys-lru</text>
+
+  <!-- LFU Section -->
+  <rect x="460" y="85" width="410" height="240" rx="12" fill="rgba(240,147,251,0.1)" stroke="rgba(240,147,251,0.4)"/>
+  <text x="665" y="115" text-anchor="middle" fill="#f093fb" font-size="18" font-weight="bold">📊 LFU — Least Frequently Used</text>
+  <text x="665" y="135" text-anchor="middle" fill="#aaa" font-size="12">Evicts item accessed fewest times</text>
+
+  <!-- LFU items with counts -->
+  <rect x="485" y="155" width="75" height="45" rx="8" fill="#f093fb" filter="url(#she)"/>
+  <text x="522" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Item A</text>
+  <text x="522" y="192" text-anchor="middle" fill="#fff" font-size="10">10x hits</text>
+
+  <rect x="570" y="155" width="75" height="45" rx="8" fill="#f093fb" filter="url(#she)"/>
+  <text x="607" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Item B</text>
+  <text x="607" y="192" text-anchor="middle" fill="#fff" font-size="10">5x hits</text>
+
+  <rect x="655" y="155" width="75" height="45" rx="8" fill="#f5576c" filter="url(#she)" stroke="#ff0" stroke-width="2"/>
+  <text x="692" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Item C</text>
+  <text x="692" y="192" text-anchor="middle" fill="#fff" font-size="10">1x hit</text>
+
+  <rect x="740" y="155" width="75" height="45" rx="8" fill="#f093fb" filter="url(#she)"/>
+  <text x="777" y="175" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Item D</text>
+  <text x="777" y="192" text-anchor="middle" fill="#fff" font-size="10">20x hits</text>
+
+  <text x="692" y="220" text-anchor="middle" fill="#f5576c" font-size="11">↑ EVICT!</text>
+  <text x="692" y="235" text-anchor="middle" fill="#f5576c" font-size="10">(Least Frequent)</text>
+
+  <rect x="485" y="250" width="360" height="60" rx="8" fill="rgba(255,255,255,0.03)"/>
+  <text x="495" y="272" fill="#43e97b" font-size="11">✅ Protects popular data</text>
+  <text x="495" y="290" fill="#43e97b" font-size="11">✅ Better for skewed workloads</text>
+  <text x="690" y="272" fill="#f5576c" font-size="11">❌ New items disadvantaged</text>
+  <text x="690" y="290" fill="#888" font-size="11">📌 Redis: allkeys-lfu</text>
+
+  <!-- FIFO Section -->
+  <rect x="30" y="345" width="410" height="240" rx="12" fill="rgba(67,233,123,0.1)" stroke="rgba(67,233,123,0.4)"/>
+  <text x="235" y="375" text-anchor="middle" fill="#43e97b" font-size="18" font-weight="bold">➡️ FIFO — First In First Out</text>
+  <text x="235" y="395" text-anchor="middle" fill="#aaa" font-size="12">Simple queue — Oldest entry removed first</text>
+
+  <!-- FIFO Queue visualization -->
+  <text x="55" y="430" fill="#aaa" font-size="11">IN →</text>
+  <rect x="85" y="415" width="60" height="35" rx="6" fill="#f5576c" filter="url(#she)" stroke="#ff0" stroke-width="2"/>
+  <text x="115" y="438" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">A (old)</text>
+
+  <text x="155" y="433" fill="#888" font-size="14">→</text>
+  <rect x="170" y="415" width="60" height="35" rx="6" fill="#43e97b" filter="url(#she)"/>
+  <text x="200" y="438" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">B</text>
+
+  <text x="240" y="433" fill="#888" font-size="14">→</text>
+  <rect x="255" y="415" width="60" height="35" rx="6" fill="#43e97b" filter="url(#she)"/>
+  <text x="285" y="438" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">C</text>
+
+  <text x="325" y="433" fill="#888" font-size="14">→</text>
+  <rect x="340" y="415" width="60" height="35" rx="6" fill="#43e97b" filter="url(#she)"/>
+  <text x="370" y="438" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">D (new)</text>
+
+  <text x="115" y="468" text-anchor="middle" fill="#f5576c" font-size="11">↑ EVICT (oldest)</text>
+  <text x="400" y="433" fill="#aaa" font-size="11">→ OUT</text>
+
+  <rect x="55" y="490" width="360" height="80" rx="8" fill="rgba(255,255,255,0.03)"/>
+  <text x="65" y="512" fill="#43e97b" font-size="11">✅ Simple to implement</text>
+  <text x="65" y="530" fill="#43e97b" font-size="11">✅ Predictable behavior</text>
+  <text x="65" y="548" fill="#f5576c" font-size="11">❌ Ignores access patterns entirely</text>
+  <text x="260" y="512" fill="#f5576c" font-size="11">❌ May evict hot data</text>
+  <text x="260" y="530" fill="#888" font-size="11">📌 Best for: Testing only</text>
+
+  <!-- Random Section -->
+  <rect x="460" y="345" width="410" height="240" rx="12" fill="rgba(254,225,64,0.1)" stroke="rgba(254,225,64,0.4)"/>
+  <text x="665" y="375" text-anchor="middle" fill="#fee140" font-size="18" font-weight="bold">🎲 Random Replacement</text>
+  <text x="665" y="395" text-anchor="middle" fill="#aaa" font-size="12">Randomly picks an entry to evict</text>
+
+  <!-- Random items -->
+  <rect x="495" y="415" width="60" height="35" rx="6" fill="#fee140" filter="url(#she)"/>
+  <text x="525" y="438" text-anchor="middle" fill="#333" font-size="11" font-weight="bold">A</text>
+  <rect x="565" y="415" width="60" height="35" rx="6" fill="#fee140" filter="url(#she)"/>
+  <text x="595" y="438" text-anchor="middle" fill="#333" font-size="11" font-weight="bold">B</text>
+  <rect x="635" y="415" width="60" height="35" rx="6" fill="#f5576c" filter="url(#she)" stroke="#ff0" stroke-width="2"/>
+  <text x="665" y="438" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">C 🎲</text>
+  <rect x="705" y="415" width="60" height="35" rx="6" fill="#fee140" filter="url(#she)"/>
+  <text x="735" y="438" text-anchor="middle" fill="#333" font-size="11" font-weight="bold">D</text>
+  <rect x="775" y="415" width="60" height="35" rx="6" fill="#fee140" filter="url(#she)"/>
+  <text x="805" y="438" text-anchor="middle" fill="#333" font-size="11" font-weight="bold">E</text>
+
+  <text x="665" y="468" text-anchor="middle" fill="#f5576c" font-size="11">↑ Random pick!</text>
+
+  <rect x="485" y="490" width="360" height="80" rx="8" fill="rgba(255,255,255,0.03)"/>
+  <text x="495" y="512" fill="#43e97b" font-size="11">✅ Zero overhead</text>
+  <text x="495" y="530" fill="#43e97b" font-size="11">✅ Very simple</text>
+  <text x="495" y="548" fill="#f5576c" font-size="11">❌ Completely unpredictable</text>
+  <text x="690" y="512" fill="#f5576c" font-size="11">❌ Suboptimal hit rates</text>
+  <text x="690" y="530" fill="#888" font-size="11">📌 Rarely used in production</text>
+
+  <!-- Bottom label -->
+  <text x="450" y="640" text-anchor="middle" fill="#667eea" font-size="13" font-weight="bold">🏆 Recommendation: Use LRU for general purpose, LFU for stable skewed workloads</text>
+</svg>

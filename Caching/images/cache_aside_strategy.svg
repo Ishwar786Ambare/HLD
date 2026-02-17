@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 500" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#667eea" flood-opacity="0.5"/>
+    </filter>
+    <filter id="sh">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <rect width="850" height="500" fill="url(#bg1)" rx="15"/>
+  <text x="425" y="40" text-anchor="middle" fill="#fff" font-size="24" font-weight="bold">🔵 Cache-Aside (Lazy Loading) Strategy</text>
+  <text x="425" y="62" text-anchor="middle" fill="#888" font-size="13">Most common caching strategy — Application manages cache explicitly</text>
+
+  <!-- Application Box -->
+  <rect x="320" y="90" width="200" height="80" rx="15" fill="#667eea" filter="url(#sh)"/>
+  <text x="420" y="125" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">🖥️ Application</text>
+  <text x="420" y="150" text-anchor="middle" fill="#ddd" font-size="12">Your Code</text>
+
+  <!-- Cache Box -->
+  <rect x="80" y="260" width="200" height="80" rx="15" fill="#f5576c" filter="url(#sh)"/>
+  <text x="180" y="295" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">⚡ Cache</text>
+  <text x="180" y="315" text-anchor="middle" fill="#ddd" font-size="12">Redis / Memcached</text>
+
+  <!-- Database Box -->
+  <rect x="560" y="260" width="200" height="80" rx="15" fill="#43e97b" filter="url(#sh)"/>
+  <text x="660" y="295" text-anchor="middle" fill="#1a1a2e" font-size="16" font-weight="bold">🗄️ Database</text>
+  <text x="660" y="315" text-anchor="middle" fill="#333" font-size="12">PostgreSQL / MySQL</text>
+
+  <!-- Step 1: App checks cache -->
+  <line x1="340" y1="170" x2="220" y2="260" stroke="#4facfe" stroke-width="2.5"/>
+  <polygon points="215,255 225,260 220,250" fill="#4facfe"/>
+  <rect x="200" y="195" width="120" height="30" rx="6" fill="rgba(79,172,254,0.2)" stroke="#4facfe"/>
+  <text x="260" y="215" text-anchor="middle" fill="#4facfe" font-size="12" font-weight="bold">① Check Cache</text>
+
+  <!-- Step 2a: Cache HIT -->
+  <rect x="30" y="380" width="140" height="55" rx="10" fill="rgba(67,233,123,0.15)" stroke="#43e97b" stroke-dasharray="4,2"/>
+  <text x="100" y="405" text-anchor="middle" fill="#43e97b" font-size="13" font-weight="bold">✅ Cache HIT</text>
+  <text x="100" y="420" text-anchor="middle" fill="#aaa" font-size="11">Return data fast!</text>
+  <line x1="130" y1="340" x2="110" y2="380" stroke="#43e97b" stroke-width="2" stroke-dasharray="5,3"/>
+
+  <!-- Step 2b: Cache MISS -->
+  <rect x="200" y="380" width="140" height="55" rx="10" fill="rgba(245,87,108,0.15)" stroke="#f5576c" stroke-dasharray="4,2"/>
+  <text x="270" y="405" text-anchor="middle" fill="#f5576c" font-size="13" font-weight="bold">❌ Cache MISS</text>
+  <text x="270" y="420" text-anchor="middle" fill="#aaa" font-size="11">Not found!</text>
+  <line x1="230" y1="340" x2="260" y2="380" stroke="#f5576c" stroke-width="2" stroke-dasharray="5,3"/>
+
+  <!-- Step 3: Query DB -->
+  <line x1="480" y1="170" x2="620" y2="260" stroke="#fee140" stroke-width="2.5"/>
+  <polygon points="615,255 625,260 620,250" fill="#fee140"/>
+  <rect x="510" y="195" width="120" height="30" rx="6" fill="rgba(254,225,64,0.2)" stroke="#fee140"/>
+  <text x="570" y="215" text-anchor="middle" fill="#fee140" font-size="12" font-weight="bold">③ Query DB</text>
+
+  <!-- Step 4: Return data -->
+  <line x1="620" y1="260" x2="480" y2="170" stroke="#43e97b" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <rect x="560" y="210" width="120" height="22" rx="6" fill="rgba(67,233,123,0.15)"/>
+  <text x="620" y="226" text-anchor="middle" fill="#43e97b" font-size="10">④ Return Data</text>
+
+  <!-- Step 5: Update cache -->
+  <path d="M 420 170 Q 420 300 280 300" fill="none" stroke="#f093fb" stroke-width="2" stroke-dasharray="5,3"/>
+  <polygon points="285,295 280,305 275,295" fill="#f093fb"/>
+  <rect x="350" y="220" width="130" height="22" rx="6" fill="rgba(240,147,251,0.15)"/>
+  <text x="415" y="235" text-anchor="middle" fill="#f093fb" font-size="10">⑤ Update Cache</text>
+
+  <!-- Bottom Summary -->
+  <rect x="400" y="390" width="370" height="90" rx="10" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)"/>
+  <text x="585" y="415" text-anchor="middle" fill="#ccc" font-size="13" font-weight="bold">Read Flow Summary</text>
+  <text x="585" y="435" text-anchor="middle" fill="#aaa" font-size="11">1. Check cache → 2. If miss, query DB</text>
+  <text x="585" y="455" text-anchor="middle" fill="#aaa" font-size="11">3. Store in cache → 4. Return data</text>
+  <text x="585" y="472" text-anchor="middle" fill="#667eea" font-size="11" font-weight="bold">Best for: Read-heavy, general-purpose caching</text>
+</svg>
