@@ -1,0 +1,22 @@
+# Node
+node_modules/
+package.json
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Temp files
+frames/
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
