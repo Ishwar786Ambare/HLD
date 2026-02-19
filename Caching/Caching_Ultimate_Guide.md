@@ -1,8 +1,8 @@
 # 🚀 Caching — The Ultimate System Design Guide
 
-> **Last Updated:** February 18, 2026
+> **Last Updated:** February 19, 2026
 > **Author:** System Design Study Notes
-> **Topics:** Caching Layers, Strategies, Invalidation, Eviction, Distributed Caching, Consistent Hashing, Practice Exercises
+> **Topics:** Caching Layers, Strategies (Cache-Aside, Write-Through, Write-Back, Write-Around), Invalidation, Eviction, Redis Deep Dive, Distributed Caching, Consistent Hashing, Real-World Case Studies, Practice Exercises
 
 ---
 
@@ -13,6 +13,7 @@
 2. [Why Caching Matters](#-why-caching-matters)
 3. [Types of Caching (Multiple Layers)](#%EF%B8%8F-types-of-caching-multiple-layers)
 4. [Caching Strategies](#-caching-strategies)
+   - Cache-Aside | Read-Through | Write-Through | Write-Back | Write-Around ⚪ (Push vs Pull)
 
 ### Part 2: Management & Distribution
 5. [Cache Invalidation](#-cache-invalidation)
@@ -27,8 +28,11 @@
 
 ### Part 4: Practical Application
 12. [Real-World Use Cases](#-real-world-use-cases)
+    - 🏆 Contest Leaderboard (Scaler Case Study)
+    - 📰 Facebook Newsfeed — Fan-Out Problem & 80-20-1 Principle
+    - 🛒 E-Commerce, Session Storage, API Rate Limiting
 13. [Best Practices](#-best-practices)
-14. [Technologies Comparison (Redis vs Memcached)](#-technologies-comparison)
+14. [Technologies Comparison — Redis Deep Dive + Redis vs Memcached](#-technologies-comparison)
 
 ### Part 5: Quick Reference & Exercises
 15. [Quick Reference Cheatsheet](#-quick-reference-cheatsheet)
@@ -468,6 +472,45 @@ Cache sits between application and database, handles fetching automatically
 
 ---
 
+### 5. **Write-Around Cache** ⚪
+
+**Bypass cache for writes** — Force-write to the database; a background job (cron) periodically syncs the updated data into the cache.
+
+> Write-Around is essentially the **push-based** equivalent of TTL. In TTL (pull-based), the cache serves data until it expires, then the app server fetches fresh data from the DB. In Write-Around (push-based), a cron job pushes fresh data from the DB to the cache on a schedule.
+
+#### Write Flow:
+```
+1. Application writes directly to database
+2. A background cron job runs periodically (e.g., every 10 minutes)
+3. Cron job pushes updated data FROM database TO cache
+4. Cache does not have a TTL field — data in cache is treated as valid
+```
+
+#### TTL (Pull) vs Write-Around (Push):
+
+| | TTL (Pull-Based) | Write-Around (Push-Based) |
+|---|---|---|
+| Who fetches fresh data? | App server (on expiry) | Background cron job |
+| Cache controls refresh? | ✅ Yes | ❌ No (cron job does) |
+| Database hits per refresh? | 1 per app server | 1 total (cron sends to all) |
+| Consistency | Eventual | Eventual |
+
+#### Pros:
+✅ Prevents thundering herd on TTL expiry (only one DB read per cycle)
+✅ Cache data doesn't "expire" — just gets pushed fresh data
+✅ Good for large, shared, infrequently-changing data
+
+#### Cons:
+❌ More complex (requires cron job infrastructure)
+❌ Still eventual consistency
+
+#### Best For:
+- Leaderboards, rank lists (updated every N minutes)
+- Shared configuration or reference data updated periodically
+- Scenarios where you want one DB recomputation, not one per app server
+
+---
+
 ### Strategy Comparison Table
 
 | Strategy | Read Perf | Write Perf | Consistency | Complexity | Data Loss Risk |
@@ -476,6 +519,7 @@ Cache sits between application and database, handles fetching automatically
 | **Read-Through** | Good (on hit) | Good | Eventual | Medium | Low |
 | **Write-Through** | Excellent | Slower | Strong | Medium | None |
 | **Write-Back** | Excellent | Excellent | Eventual | High | **Medium-High** |
+| **Write-Around** | Good (on hit) | Good | Eventual | Medium | Low |
 
 ---
 
@@ -957,19 +1001,198 @@ if time_to_expire < 60 and random.random() < 0.1:
 
 ## 🎓 Real-World Use Cases
 
-### 1. **Facebook Newsfeed Calculation**
+### 1. **Contest Leaderboard (Scaler Case Study)** 🏆
 
-**Problem:** Calculating newsfeed is expensive (friends' posts, ranking, filtering)
+**Problem:** An online coding contest with 30,000+ simultaneous users. Submissions come in hundreds per minute. How do you maintain an accurate, fast leaderboard (rank list)?
 
-**Solution:**
-- Pre-calculate newsfeed asynchronously
-- Cache in Redis with 15-minute TTL
-- Return cached version on page load
-- Update incrementally with new posts
+#### Challenges:
+- High submission traffic → rank list changes constantly
+- Computing rank list requires joining 4+ large tables → very expensive query (~5 seconds)
+- Immediate consistency is **not required** (Scaler updates every 10-15 minutes)
+
+#### Option A: Local Cache + TTL (Pull-Based)
+```
+✅ App Server 1 has local cache: Rank List (expires in 1 min)
+✅ App Server 2 has local cache: Rank List (expires in 1 min)
+✅ App Server 3 has local cache: Rank List (expires in 1 min)
+
+Problem: When TTL fires on ALL servers → ALL 100 app servers hit
+the database and recompute the rank list simultaneously!
+→ 100 expensive queries/minute to the DB ❌
+```
+
+#### Option B: Write-Around Cache with Local Cache (Push-Based)
+```
+✅ One cron job runs every minute
+✅ Cron job computes the rank list ONCE from the database
+✅ Cron pushes the updated rank list to all 100 app servers
+
+Better: Only 1 expensive DB query per minute ✅
+Downside: 100 network pushes (each ~3-10 MB) every minute
+```
+
+#### Option C: Global Cache ✅ (Best Solution — What Scaler Uses)
+```
+✅ One cron job runs every 10-15 minutes
+✅ Cron job computes the rank list ONCE from the database
+✅ Cron pushes rank list to the GLOBAL CACHE (e.g., Redis) only
+✅ All app servers query Global Cache (paginated queries)
+
+Best: Only 1 DB query per cycle, 1 push to cache, reads are paginated (small responses)
+```
+
+#### Why Global Cache Wins Over Write-Around (Local) Cache:
+
+| | Write-Around (Local) | Global Cache |
+|---|---|---|
+| DB recomputation | 1x per minute | 1x per cycle |
+| Data pushed to | All 100 app servers (~10 MB × 100) | Single cache node (~10 MB × 1) |
+| Reads paginated? | Yes, but full list must be stored locally | Yes, only small pages fetched |
+| Consistency | Eventual | Eventual |
+
+#### Redis for Leaderboard:
+Redis Sorted Sets are the perfect data structure here:
+```python
+# Store: contest_id → user_handle → score
+redis.zadd(f"leaderboard:{contest_id}", {user_handle: score})
+
+# Paginated read: Get ranks 2000-2020 (page 100)
+ranking = redis.zrevrange(f"leaderboard:{contest_id}", 2000, 2020, withscores=True)
+
+# Find my rank
+my_rank = redis.zrevrank(f"leaderboard:{contest_id}", my_handle)
+```
+
+> 🔑 **Key Insight:** Redis Sorted Sets store elements sorted by score. You can jump directly to any rank position (no full scan), making paginated leaderboard queries O(log N).
+
+#### Rank List Size Estimate:
+```
+User handle:  32 bytes (string)
+Rank:          4 bytes (integer)
+Entry total:  36 bytes
+
+100,000 users × 36 bytes = 3.6 MB per rank list
+(With additional fields: score, profile info → ~10-20 MB)
+```
+
+---
+
+### 2. **Facebook Newsfeed (Case Study)** 📰
+
+**Problem:** Design a caching strategy for Facebook's newsfeed for 1 billion+ users.
+
+#### 80-20-1 Principle in Social Media:
+
+This is key for estimating traffic and designing caches:
+
+```
+80% of users → Passive observers (read only, no interaction)
+20% of users → Active consumers (like, comment, share)
+ 1% of users → Content creators (post new content)
+```
+
+**Daily Active Users (DAU):** ~800 million
+**Daily post creators:** 800M × 1% = **8 million users**
+**Posts per creator per day:** ~10 posts
+**Total posts per day:** ~80 million posts
+
+#### Estimating Post Storage:
+```
+Field          |  Size
+---------------|-------
+post_id        |  8 bytes
+user_id        |  8 bytes
+content        | ~250 bytes
+location_id    |  8 bytes
+media_path     | ~250 bytes
+timestamp      |  8 bytes
+               | ≈ 1 KB per post (rough)
+
+80M posts/day × 1 KB = 80 GB/day
+80 GB × 30 days = 2.4 TB/month ← fits on one server!
+```
+
+> 🔑 **Key Insight:** Newsfeed only shows recent data (last ~1 month). Only 1 month of post data is needed to serve any newsfeed. This makes the problem tractable.
+
+#### Data Model:
+```sql
+-- Core tables
+users           (user_id, name, email, ...)
+posts           (post_id, user_id, content, timestamp, ...)
+user_friends    (user_id, friend_id)   ← friendship graph
+```
+
+#### Newsfeed Query (Naive — Very Expensive):
+```sql
+SELECT posts.*
+FROM posts
+JOIN user_friends ON posts.user_id = user_friends.friend_id
+JOIN users ON posts.user_id = users.user_id
+WHERE user_friends.user_id = :my_user_id
+ORDER BY posts.timestamp DESC
+LIMIT 20 OFFSET :offset;
+```
+This joins 3-4 large tables and touches **many database shards** → extremely slow.
+
+#### Sharding Strategy — Shard by User ID:
+
+Facebook shards their database by user ID (they call these **UDBs — User Databases**). Each shard holds data for many users whose IDs hash to that shard.
+
+```
+Shard 0: users U1, U2, U3 ... (and ALL their posts)
+Shard 1: users U4, U5, U6 ... (and ALL their posts)
+...
+
+Profile Page Query → hits ONLY ONE shard ✅ (fast!)
+Newsfeed Query    → hits MANY shards ❌ (slow, each friend may be on a different shard)
+```
+
+**Why sharding by user_id is great for profiles but bad for newsfeeds:**
+> If I have 5,000 friends spread across 1,000 shards, fetching my newsfeed touches 1,000 database servers. That multiplies database load by 1,000!
+
+#### The Fan-Out Write Problem:
+
+When a user makes a post, that post must appear in every friend's newsfeed.
+
+```
+Bishwajit makes 1 post
+→ Bishwajit has 1,000 friends
+→ That 1 post must be written to 1,000 newsfeeds!
+
+This is called FAN-OUT: 1 write → N copies
+```
+
+**Two approaches and their trade-offs:**
+
+| Approach | What's stored in cache? | Problem |
+|----------|------------------------|----------|
+| **Option A** — Store post IDs only | `user_id → [post_id_1, post_id_2, ...]` | To render, must fetch each post from different shards → slow reads |
+| **Option B** — Store full post content | `user_id → [full_post_1, full_post_2, ...]` | 1 post replicated 1,000x → huge storage, fan-out writes expensive |
+
+**Option B gets very expensive:**
+```
+80M posts/day × avg 1,000 friends = 80 BILLION write operations/day
+→ Data size multiplied by 1,000× due to fan-out
+→ Any algorithm change = recompute ALL 1B+ newsfeeds from scratch
+```
+
+#### What Doesn't Work:
+❌ **Caching user_id → full_newsfeed** — Storage is too large, fan-out writes are too expensive, algorithm changes require full recompute
+❌ **TTL on each app server** — With 100 app servers, each computing the newsfeed independently = 100× DB load
+❌ **Write-Through with local cache** — When data changes, must invalidate/update all app servers
+
+#### What Facebook Actually Does (Simplified):
+1. **Pre-computed feed stored in global cache (Redis)** — But NOT the full content
+2. **Shard post data by user_id** — Each user's posts on one shard
+3. **Use push model** for active users, **pull model** for passive users
+4. **Paginated reads** — The app never fetches the full newsfeed at once, only the current page
+5. **Eventual consistency is acceptable** — Posts may appear in friend's feeds with a delay
 
 **Result:** Sub-second newsfeed loads for billions of users
 
-### 2. **E-Commerce Product Catalog**
+---
+
+### 3. **E-Commerce Product Catalog**
 
 **Solution:**
 - Cache-Aside strategy
@@ -979,7 +1202,7 @@ if time_to_expire < 60 and random.random() < 0.1:
 
 **Result:** 95%+ cache hit rate, 10x faster page loads
 
-### 3. **Session Storage**
+### 4. **Session Storage**
 
 **Solution:**
 - Store sessions in Redis (global cache)
@@ -988,7 +1211,7 @@ if time_to_expire < 60 and random.random() < 0.1:
 
 **Result:** Stateless app servers, easy horizontal scaling
 
-### 4. **API Rate Limiting**
+### 5. **API Rate Limiting**
 
 ```python
 key = f"rate_limit:{user_id}:{current_minute}"
@@ -999,7 +1222,7 @@ if count > 100:
     return "Rate limit exceeded"
 ```
 
-### 5. **Leaderboard / Rankings**
+### 6. **Leaderboard / Rankings (Redis Sorted Sets)**
 
 ```python
 # Add player score
@@ -1007,6 +1230,12 @@ redis.zadd("leaderboard", {player_id: score})
 
 # Get top 10
 top_10 = redis.zrevrange("leaderboard", 0, 9, withscores=True)
+
+# Get rank of specific player
+rank = redis.zrevrank("leaderboard", player_id)
+
+# Get players ranked 100-120 (paginated)
+page_data = redis.zrevrange("leaderboard", 100, 120, withscores=True)
 ```
 
 ---
@@ -1074,6 +1303,49 @@ def warm_cache():
 
 ## 🔧 Technologies Comparison
 
+### Redis Deep Dive 🔴
+
+Redis (**RE**mote **DI**ctionary **S**erver) is the most popular in-memory cache. Written in **C**, it is:
+
+- **Single-threaded** — All commands execute sequentially, no locks needed, extremely fast
+- **In-memory** — All data stored in RAM (optional disk persistence with RDB/AOF)
+- **Key-Value store** — With rich data type support
+
+> 💡 **Why single-threaded?** Single-threading avoids lock contention on writes, making individual operations extremely fast. Redis can handle 100,000+ operations/second despite being single-threaded. (Also: implementing async concurrent code in C is complex — Redis chose simplicity.)
+
+#### Redis Data Types:
+
+| Type | Description | Example Use Case |
+|------|-------------|------------------|
+| **String** | Text, numbers, binary | Simple key-value cache |
+| **List** | Ordered list (linked list) | Message queues, recent activity |
+| **Set** | Unordered unique elements | Tags, unique visitors |
+| **Hash** | Field-value pairs (like a dict) | User profile objects |
+| **Sorted Set (ZSET)** | Set scored + sorted by value | Leaderboards, ranked data |
+
+#### Sorted Set — The Leaderboard Superpower:
+
+```python
+# Sorted Set: key → {member: score}
+# Redis keeps members sorted by score automatically
+
+# Write: O(log N)
+redis.zadd("contest:123:leaderboard", {"user_handle": score})
+
+# Read: Jump directly to any position O(log N + K)
+# Get ranks 2000-2020 (page 100, 20 results per page)
+redis.zrevrange("contest:123:leaderboard", 2000, 2020, withscores=True)
+
+# Find user's rank O(log N)
+redis.zrevrank("contest:123:leaderboard", "my_handle")
+```
+
+Sorted Sets use a **skip list** + **hash map** internally — reads and writes are O(log N).
+
+#### Try Redis: [try.redis.io](https://try.redis.io)
+
+---
+
 ### Redis vs Memcached
 
 | Feature | Redis | Memcached |
@@ -1083,11 +1355,12 @@ def warm_cache():
 | Replication | Built-in master-slave | No (client-side) |
 | Clustering | Redis Cluster | Client-side sharding |
 | Max Value Size | 512MB | 1MB |
+| Threading | Single-threaded | Multi-threaded |
 | Performance | Excellent | Slightly faster (simple ops) |
 | Use Case | Complex caching, pub/sub, queues | Simple key-value cache |
 
-**Choose Redis:** Need persistence, complex data structures, pub/sub, clustering
-**Choose Memcached:** Simple key-value only, maximum performance, large-scale distributed caching
+**Choose Redis:** Need persistence, complex data types (sorted sets for leaderboards), pub/sub, clustering
+**Choose Memcached:** Simple key-value only, multi-threaded performance, maximum horizontal scaling
 
 ---
 
@@ -1591,16 +1864,19 @@ Caching is a **critical technique** in system design that:
 
 ✅ Use **multiple caching layers** (browser, CDN, app, database)
 ✅ Choose the **right strategy** based on your workload (Cache-Aside for most cases)
+✅ Know **Write-Around (push-based)** vs **TTL (pull-based)** — they solve different thundering herd scenarios
 ✅ Implement **proper invalidation** to avoid stale data
 ✅ Select **appropriate eviction policy** (LRU for general use)
 ✅ Use **consistent hashing** for distributed caches
 ✅ Monitor **cache metrics** (hit rate, eviction rate)
 ✅ Plan for **common problems** (penetration, avalanche, hotspots)
+✅ Use **Redis Sorted Sets** for leaderboards — O(log N) reads with direct pagination
+✅ Understand **fan-out** and the **80-20-1 principle** when designing social feed caches
 ✅ Always have a **fallback** to the source of truth
 
 ---
 
 **Happy Caching! 🚀**
 
-*Last Updated: February 18, 2026*
-*This guide combines: Complete Guide + Quick Reference + Practice Exercises*
+*Last Updated: February 19, 2026*
+*This guide combines: Complete Guide + Quick Reference + Practice Exercises + Real-World Case Studies*
