@@ -312,6 +312,16 @@ Different data on each             Same data on each
 > - **A** — Availability
 > - **P** — Partition Tolerance
 
+---
+
+### 🎬 Visual Overview — CAP Theorem & PACELC Animated Diagram
+
+![CAP Theorem & PACELC Complete Visual Reference](images/cap_theorem_diagram.gif)
+
+> *The diagram above animates the full CAP triangle, database placements (CP / AP / CA), and the PACELC decision flow — all on a single reference poster.*
+
+---
+
 ```
               CONSISTENCY (C)
                    △

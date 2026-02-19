@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            width: 1400px;
+            height: 800px;
+            overflow: hidden;
+        }
+
+        /* ── TITLE BAR ── */
+        .title-bar {
+            background: linear-gradient(90deg, #1e3a5f 0%, #1d4ed8 50%, #1e3a5f 100%);
+            background-size: 200% 100%;
+            animation: shimmer 4s linear infinite;
+            padding: 10px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .title-bar h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.3px;
+        }
+
+        .title-bar .subtitle {
+            font-size: 11px;
+            color: #bfdbfe;
+        }
+
+        .title-bar .tags {
+            display: flex;
+            gap: 6px;
+        }
+
+        .tag {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .layout {
+            display: flex;
+            height: 748px;
+            gap: 0;
+        }
+
+        /* ── PANEL SHARED ── */
+        .panel {
+            padding: 10px 14px;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .panel-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #1e3a5f;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid #1d4ed8;
+            padding-bottom: 4px;
+        }
+
+        /* ══════════════ LEFT PANEL — CAP TRIANGLE ══════════════ */
+        .left {
+            flex: 0 0 430px;
+        }
+
+        .triangle-wrap {
+            position: relative;
+            width: 402px;
+            height: 350px;
+            margin: 0 auto;
+        }
+
+        .tri-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Zone breathing */
+        .zone-cp {
+            animation: breatheBlue 3.0s ease-in-out infinite;
+        }
+
+        .zone-ap {
+            animation: breatheGreen 3.0s ease-in-out 1s infinite;
+        }
+
+        .zone-ca {
+            animation: breathePurp 3.0s ease-in-out 2s infinite;
+        }
+
+        @keyframes breatheBlue {
+
+            0%,
+            100% {
+                opacity: 0.30
+            }
+
+            50% {
+                opacity: 0.55
+            }
+        }
+
+        @keyframes breatheGreen {
+
+            0%,
+            100% {
+                opacity: 0.30
+            }
+
+            50% {
+                opacity: 0.55
+            }
+        }
+
+        @keyframes breathePurp {
+
+            0%,
+            100% {
+                opacity: 0.30
+            }
+
+            50% {
+                opacity: 0.55
+            }
+        }
+
+        /* Vertices */
+        .vertex {
+            position: absolute;
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .vertex .v-letter {
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .vertex .v-name {
+            font-size: 8.5px;
+            font-weight: 700;
+            margin-top: 2px;
+            text-align: center;
+        }
+
+        .vertex .v-def {
+            font-size: 6.5px;
+            font-weight: 400;
+            margin-top: 1px;
+            text-align: center;
+            opacity: 0.85;
+            line-height: 1.2;
+        }
+
+        .v-c {
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle at 35% 35%, #60a5fa, #1d4ed8);
+            animation: pulseC 2.5s ease-in-out infinite;
+        }
+
+        .v-a {
+            bottom: 8px;
+            left: 4px;
+            background: radial-gradient(circle at 35% 35%, #34d399, #059669);
+            animation: pulseA 2.5s ease-in-out 0.8s infinite;
+        }
+
+        .v-p {
+            bottom: 8px;
+            right: 4px;
+            background: radial-gradient(circle at 35% 35%, #fbbf24, #d97706);
+            animation: pulseP 2.5s ease-in-out 1.6s infinite;
+        }
+
+        @keyframes pulseC {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.5), 0 4px 16px rgba(29, 78, 216, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 0 12px rgba(29, 78, 216, 0), 0 4px 24px rgba(29, 78, 216, 0.5);
+            }
+        }
+
+        @keyframes pulseA {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5), 0 4px 16px rgba(5, 150, 105, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 0 12px rgba(5, 150, 105, 0), 0 4px 24px rgba(5, 150, 105, 0.5);
+            }
+        }
+
+        @keyframes pulseP {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.5), 0 4px 16px rgba(217, 119, 6, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 0 12px rgba(217, 119, 6, 0), 0 4px 24px rgba(217, 119, 6, 0.5);
+            }
+        }
+
+        /* Edge callout cards */
+        .edge-card {
+            position: absolute;
+            border-radius: 8px;
+            padding: 6px 9px;
+            font-size: 9.5px;
+            border: 1.5px solid;
+            line-height: 1.4;
+            max-width: 110px;
+            text-align: center;
+        }
+
+        .ec-cp {
+            top: 120px;
+            right: -10px;
+            background: #eff6ff;
+            color: #1e40af;
+            border-color: #93c5fd;
+            animation: floatRight 3s ease-in-out infinite;
+        }
+
+        .ec-ap {
+            bottom: 54px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: #6ee7b7;
+            animation: floatDown 3s ease-in-out 1s infinite;
+        }
+
+        .ec-ca {
+            top: 120px;
+            left: -10px;
+            background: #faf5ff;
+            color: #6d28d9;
+            border-color: #c4b5fd;
+            animation: floatLeft 3s ease-in-out 2s infinite;
+        }
+
+        @keyframes floatRight {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(4px);
+            }
+        }
+
+        @keyframes floatDown {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(4px);
+            }
+        }
+
+        @keyframes floatLeft {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(-4px);
+            }
+        }
+
+        .ec-title {
+            font-weight: 800;
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+        .ec-db {
+            font-size: 8px;
+            opacity: 0.75;
+        }
+
+        .ec-example {
+            font-size: 8.5px;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        /* Center warning */
+        .center-warn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff7ed;
+            border: 2px solid #fb923c;
+            border-radius: 50%;
+            width: 74px;
+            height: 74px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            animation: warnPulse 2s ease-in-out infinite;
+        }
+
+        .center-warn .cw-icon {
+            font-size: 18px;
+        }
+
+        .center-warn .cw-text {
+            font-size: 7.5px;
+            font-weight: 800;
+            color: #c2410c;
+            line-height: 1.2;
+        }
+
+        @keyframes warnPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.5);
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(251, 146, 60, 0);
+                transform: translate(-50%, -50%) scale(1.06);
+            }
+        }
+
+        /* Rule banner */
+        .rule-banner {
+            background: linear-gradient(90deg, #fef3c7, #fde68a, #fef3c7);
+            background-size: 200% 100%;
+            border: 1.5px solid #f59e0b;
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #78350f;
+            text-align: center;
+            animation: bannerShimmer 3s linear infinite;
+        }
+
+        @keyframes bannerShimmer {
+            0% {
+                background-position: 200% 0
+            }
+
+            100% {
+                background-position: -200% 0
+            }
+        }
+
+        /* DB Badges row */
+        .db-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .db-badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 4px 9px;
+            border-radius: 20px;
+            border: 1.5px solid;
+            animation: badgeFloat 2.5s ease-in-out infinite;
+        }
+
+        .db-badge:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .db-badge:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .db-badge:nth-child(3) {
+            animation-delay: 0.8s;
+        }
+
+        .db-badge:nth-child(4) {
+            animation-delay: 1.2s;
+        }
+
+        .db-badge:nth-child(5) {
+            animation-delay: 1.6s;
+        }
+
+        .db-badge:nth-child(6) {
+            animation-delay: 2.0s;
+        }
+
+        @keyframes badgeFloat {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-3px)
+            }
+        }
+
+        .b-cp {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .b-ap {
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+
+        .b-ca {
+            background: #faf5ff;
+            color: #6d28d9;
+            border-color: #ddd6fe;
+        }
+
+        /* ══════════════ MIDDLE PANEL — NETWORK PARTITION ══════════════ */
+        .middle {
+            flex: 0 0 310px;
+        }
+
+        .machine-wrap {
+            position: relative;
+            width: 280px;
+            height: 200px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        /* Machine boxes */
+        .machine {
+            position: absolute;
+            width: 80px;
+            border-radius: 8px;
+            padding: 7px 6px;
+            text-align: center;
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .machine .m-icon {
+            font-size: 18px;
+        }
+
+        .machine .m-label {
+            font-size: 8.5px;
+            color: inherit;
+            margin-top: 2px;
+        }
+
+        .machine .m-status {
+            font-size: 7.5px;
+            border-radius: 10px;
+            padding: 1px 5px;
+            margin-top: 3px;
+            display: inline-block;
+        }
+
+        .m1 {
+            top: 20px;
+            left: 14px;
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1.5px solid #93c5fd;
+            animation: machineGlow1 2s ease-in-out infinite;
+        }
+
+        .m2 {
+            top: 20px;
+            right: 14px;
+            background: #dcfce7;
+            color: #166534;
+            border: 1.5px solid #86efac;
+            animation: machineGlow2 2s ease-in-out 1s infinite;
+        }
+
+        .m3 {
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            background: #fef9c3;
+            color: #713f12;
+            border: 1.5px solid #fde047;
+            animation: machineGlow3 2s ease-in-out 0.5s infinite;
+        }
+
+        @keyframes machineGlow1 {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4)
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(59, 130, 246, 0)
+            }
+        }
+
+        @keyframes machineGlow2 {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4)
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(34, 197, 94, 0)
+            }
+        }
+
+        @keyframes machineGlow3 {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4)
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(234, 179, 8, 0)
+            }
+        }
+
+        /* SVG connections in machine diagram */
+        .conn-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Flowing data packet on normal connection */
+        .data-packet {
+            animation: flowData 2s linear infinite;
+        }
+
+        .data-packet2 {
+            animation: flowData2 2s linear 1s infinite;
+        }
+
+        @keyframes flowData {
+            0% {
+                transform: translate(94px, 60px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(166px, 60px);
+                opacity: 0.2;
+            }
+        }
+
+        @keyframes flowData2 {
+            0% {
+                transform: translate(166px, 60px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(94px, 60px);
+                opacity: 0.2;
+            }
+        }
+
+        /* Broken link (partition) */
+        .partition-line {
+            animation: partFlash 1.2s ease-in-out infinite;
+        }
+
+        @keyframes partFlash {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.3
+            }
+        }
+
+        /* Scenario cards */
+        .scenario-card {
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 9.5px;
+            border: 1.5px solid;
+        }
+
+        .sc-title {
+            font-weight: 800;
+            font-size: 11px;
+            margin-bottom: 3px;
+        }
+
+        .sc-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        .sc-icon {
+            flex-shrink: 0;
+            width: 14px;
+        }
+
+        .sc-cp {
+            background: #eff6ff;
+            color: #1e40af;
+            border-color: #93c5fd;
+        }
+
+        .sc-ap {
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+
+        /* Latency scale */
+        .latency-bar {
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+            position: relative;
+            margin-top: 2px;
+        }
+
+        .lat-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            color: #6b7280;
+            margin-top: 1px;
+        }
+
+        .lat-pointer {
+            position: absolute;
+            top: -4px;
+            width: 4px;
+            height: 18px;
+            background: #1e40af;
+            border-radius: 2px;
+            animation: latSlide 4s ease-in-out infinite;
+        }
+
+        @keyframes latSlide {
+
+            0%,
+            100% {
+                left: 10%
+            }
+
+            50% {
+                left: 75%
+            }
+        }
+
+        /* ══════════════ RIGHT PANEL — PACELC + TABLE ══════════════ */
+        .right {
+            flex: 1;
+            border-right: none;
+        }
+
+        /* PACELC Flow */
+        .flow-area {
+            position: relative;
+            height: 310px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .flow-svg-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Flow node boxes */
+        .fnode {
+            position: absolute;
+            border-radius: 10px;
+            padding: 7px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            border: 2px solid;
+        }
+
+        .fn-start {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a5f;
+            color: #fff;
+            border-color: #1e3a5f;
+            font-size: 13px;
+            padding: 9px 22px;
+            border-radius: 50px;
+            animation: startPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes startPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(30, 58, 95, 0.5)
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(30, 58, 95, 0)
+            }
+        }
+
+        .fn-q {
+            top: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fef3c7;
+            color: #78350f;
+            border-color: #fcd34d;
+            width: 150px;
+            animation: qBounce 3s ease-in-out infinite;
+        }
+
+        @keyframes qBounce {
+
+            0%,
+            100% {
+                transform: translateX(-50%) scale(1)
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.04)
+            }
+        }
+
+        .fn-yes {
+            top: 140px;
+            left: 26px;
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+            width: 120px;
+            animation: sideFloat 3s ease-in-out infinite;
+        }
+
+        .fn-no {
+            top: 140px;
+            right: 26px;
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #6ee7b7;
+            width: 120px;
+            animation: sideFloat 3s ease-in-out 1.5s infinite;
+        }
+
+        @keyframes sideFloat {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-4px)
+            }
+        }
+
+        .fn-ap {
+            top: 210px;
+            left: 10px;
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: #a7f3d0;
+            width: 145px;
+        }
+
+        .fn-cp {
+            top: 210px;
+            left: 160px;
+            background: #eff6ff;
+            color: #1e40af;
+            border-color: #93c5fd;
+            width: 145px;
+        }
+
+        .fn-el {
+            top: 210px;
+            right: 155px;
+            background: #fdf4ff;
+            color: #6d28d9;
+            border-color: #d8b4fe;
+            width: 145px;
+        }
+
+        .fn-ec {
+            top: 210px;
+            right: 5px;
+            background: #fffbeb;
+            color: #78350f;
+            border-color: #fcd34d;
+            width: 145px;
+        }
+
+        .fn-box-title {
+            font-size: 10.5px;
+            font-weight: 800;
+            margin-bottom: 3px;
+        }
+
+        .fn-box-sub {
+            font-size: 8.5px;
+            font-weight: 500;
+            line-height: 1.3;
+            opacity: 0.85;
+        }
+
+        .fn-box-eg {
+            font-size: 8px;
+            font-style: italic;
+            margin-top: 3px;
+            color: inherit;
+            opacity: 0.7;
+        }
+
+        /* Animated flow arrows SVG */
+        .flow-arrow {
+            stroke: #9ca3af;
+            stroke-width: 1.8;
+            fill: none;
+            marker-end: url(#fArr);
+        }
+
+        .flow-dashes {
+            stroke-dasharray: 6 4;
+            animation: dashFlow 1.5s linear infinite;
+        }
+
+        @keyframes dashFlow {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+
+        /* PACELC table */
+        .db-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+
+        .db-table thead th {
+            background: #1e3a5f;
+            color: #fff;
+            padding: 6px 8px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 10px;
+        }
+
+        .db-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .db-table tbody tr:nth-child(even) td {
+            background: #f9fafb;
+        }
+
+        .db-table tbody td {
+            padding: 5px 8px;
+            color: #374151;
+        }
+
+        .db-table tbody tr {
+            animation: rowHighlight 6s linear infinite;
+        }
+
+        .db-table tbody tr:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .db-table tbody tr:nth-child(2) {
+            animation-delay: 1s;
+        }
+
+        .db-table tbody tr:nth-child(3) {
+            animation-delay: 2s;
+        }
+
+        .db-table tbody tr:nth-child(4) {
+            animation-delay: 3s;
+        }
+
+        .db-table tbody tr:nth-child(5) {
+            animation-delay: 4s;
+        }
+
+        .db-table tbody tr:nth-child(6) {
+            animation-delay: 5s;
+        }
+
+        @keyframes rowHighlight {
+
+            0%,
+            14%,
+            100% {
+                background: inherit
+            }
+
+            2%,
+            12% {
+                background: #fef9c3
+            }
+        }
+
+        .badge {
+            font-weight: 800;
+        }
+
+        .badge-ap {
+            color: #059669;
+        }
+
+        .badge-cp {
+            color: #1d4ed8;
+        }
+
+        .badge-l {
+            color: #7c3aed;
+        }
+
+        .badge-c {
+            color: #b45309;
+        }
+
+        .badge-na {
+            color: #9ca3af;
+        }
+
+        /* Consistency spectrum bar */
+        .spectrum-wrap {
+            padding: 4px 0;
+        }
+
+        .spectrum-bar {
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            position: relative;
+        }
+
+        .spectrum-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.5px;
+            color: #6b7280;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+
+        .spec-dot {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #1e3a5f;
+            font-size: 6px;
+            font-weight: 800;
+            color: #1e3a5f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: dotBob 2s ease-in-out infinite;
+            cursor: default;
+        }
+
+        .dot-cassandra {
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .dot-dynamo {
+            left: 12%;
+            animation-delay: 0.3s;
+        }
+
+        .dot-mongo {
+            left: 40%;
+            animation-delay: 0.6s;
+        }
+
+        .dot-mysql {
+            left: 72%;
+            animation-delay: 0.9s;
+        }
+
+        .dot-hbase {
+            left: 88%;
+            animation-delay: 1.2s;
+        }
+
+        .dot-zoo {
+            left: 95%;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes dotBob {
+
+            0%,
+            100% {
+                transform: translateY(-50%) scale(1)
+            }
+
+            50% {
+                transform: translateY(-80%) scale(1.1)
+            }
+        }
+
+        .dot-label {
+            position: absolute;
+            top: -20px;
+            font-size: 7px;
+            font-weight: 700;
+            color: #1e3a5f;
+            white-space: nowrap;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TITLE BAR -->
+    <div class="title-bar">
+        <div>
+            <h1>🧩 CAP Theorem &amp; PACELC — Complete Visual Reference</h1>
+            <div class="subtitle">Distributed Systems Design · Only 2 of 3 CAP properties can be guaranteed
+                simultaneously</div>
+        </div>
+        <div class="tags">
+            <span class="tag">Consistency</span>
+            <span class="tag">Availability</span>
+            <span class="tag">Partition Tolerance</span>
+            <span class="tag">Latency</span>
+            <span class="tag">PACELC</span>
+        </div>
+    </div>
+
+    <div class="layout">
+
+        <!-- ══ LEFT PANEL: CAP TRIANGLE ══ -->
+        <div class="panel left">
+            <div class="panel-title">📐 CAP Theorem Triangle</div>
+
+            <div class="triangle-wrap">
+                <svg class="tri-svg" width="402" height="350" viewBox="0 0 402 350">
+                    <defs>
+                        <marker id="tArr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                            <polygon points="0 0, 7 3.5, 0 7" fill="#9ca3af" />
+                        </marker>
+                    </defs>
+
+                    <!-- Zone fills -->
+                    <polygon class="zone-cp" points="201,36 376,322 289,322" fill="#bfdbfe" />
+                    <polygon class="zone-ap" points="201,36 113,322 289,322" fill="#a7f3d0" />
+                    <polygon class="zone-ca" points="201,36 26,322 113,322" fill="#ddd6fe" />
+
+                    <!-- Outline -->
+                    <path d="M201,36 L376,322 L26,322 Z" fill="none" stroke="#374151" stroke-width="2.5"
+                        stroke-linejoin="round" />
+
+                    <!-- Dashed dividers inside triangle -->
+                    <line x1="201" y1="36" x2="201" y2="322" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="5,4" />
+                    <line x1="201" y1="36" x2="289" y2="322" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="5,4" />
+                    <line x1="201" y1="36" x2="113" y2="322" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="5,4" />
+                </svg>
+
+                <!-- Vertex: C -->
+                <div class="vertex v-c">
+                    <span class="v-letter">C</span>
+                    <span class="v-name">Consistency</span>
+                    <span class="v-def">Latest write always returned</span>
+                </div>
+
+                <!-- Vertex: A -->
+                <div class="vertex v-a">
+                    <span class="v-letter">A</span>
+                    <span class="v-name">Availability</span>
+                    <span class="v-def">Always responds, no error</span>
+                </div>
+
+                <!-- Vertex: P -->
+                <div class="vertex v-p">
+                    <span class="v-letter">P</span>
+                    <span class="v-name">Partition Tol.</span>
+                    <span class="v-def">Works despite net failures</span>
+                </div>
+
+                <!-- Edge cards -->
+                <div class="edge-card ec-cp">
+                    <div class="ec-title">🔵 CP</div>
+                    <div class="ec-example">Consistent + Partition Safe</div>
+                    <div class="ec-db">Zookeeper · HBase · MongoDB</div>
+                    <div class="ec-example">Banking · IRCTC · Stock Trading</div>
+                </div>
+                <div class="edge-card ec-ap">
+                    <div class="ec-title">🟢 AP</div>
+                    <div class="ec-example">Available + Partition Safe</div>
+                    <div class="ec-db">Cassandra · DynamoDB · CouchDB</div>
+                    <div class="ec-example">YouTube Views · Social Feeds · DNS</div>
+                </div>
+                <div class="edge-card ec-ca">
+                    <div class="ec-title">🟣 CA</div>
+                    <div class="ec-example">⚠️ Single Machine Only!</div>
+                    <div class="ec-db">MySQL (1 node) · SQLite</div>
+                    <div class="ec-example">Not possible in distributed systems</div>
+                </div>
+
+                <!-- Center warning -->
+                <div class="center-warn">
+                    <span class="cw-icon">⚠️</span>
+                    <span class="cw-text">Pick only<br>2 of 3</span>
+                </div>
+            </div>
+
+            <!-- Rule Banner -->
+            <div class="rule-banner">
+                🔑 In distributed systems: P is <strong>ALWAYS required</strong> → Real choice is <strong>CP or
+                    AP</strong>
+            </div>
+
+            <!-- DB Badges -->
+            <div class="db-badges">
+                <span class="db-badge b-cp">🔵 Zookeeper — CP</span>
+                <span class="db-badge b-cp">🔵 HBase — CP</span>
+                <span class="db-badge b-ap">🟢 Cassandra — AP</span>
+                <span class="db-badge b-ap">🟢 DynamoDB — AP</span>
+                <span class="db-badge b-ap">🟢 CouchDB — AP</span>
+                <span class="db-badge b-ca">🟣 Single SQL — CA</span>
+            </div>
+        </div>
+
+        <!-- ══ MIDDLE PANEL: NETWORK PARTITION ══ -->
+        <div class="panel middle">
+            <div class="panel-title">🌐 Network Partition Scenario</div>
+
+            <!-- Machine diagram -->
+            <div class="machine-wrap">
+                <svg class="conn-svg" viewBox="0 0 280 200">
+                    <defs>
+                        <marker id="mArr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <polygon points="0 0, 6 3, 0 6" fill="#94a3b8" />
+                        </marker>
+                    </defs>
+
+                    <!-- Normal links (dashed animated) -->
+                    <line x1="94" y1="60" x2="186" y2="60" stroke="#93c5fd" stroke-width="2" stroke-dasharray="6 4"
+                        style="stroke-dashoffset:0; animation: dashFlow 1s linear infinite;" />
+                    <line x1="54" y1="100" x2="130" y2="160" stroke="#86efac" stroke-width="2" stroke-dasharray="6 4"
+                        style="animation: dashFlow 1s linear 0.5s infinite;" />
+                    <line x1="226" y1="100" x2="150" y2="160" stroke="#86efac" stroke-width="2" stroke-dasharray="6 4"
+                        style="animation: dashFlow 1s linear 0.3s infinite;" />
+
+                    <!-- Partition flash between M1 & M2 -->
+                    <line class="partition-line" x1="140" y1="50" x2="140" y2="70" stroke="#ef4444" stroke-width="3"
+                        stroke-dasharray="4 3" />
+                    <text class="partition-line" x="110" y="48" font-size="8" fill="#ef4444" font-weight="700">✂
+                        Partition</text>
+
+                    <!-- Flowing data dots M1→M3 -->
+                    <circle r="4" fill="#3b82f6" style="animation: flowM1M3 2s linear infinite;">
+                        <animateMotion dur="2s" repeatCount="indefinite" path="M54,60 L130,160" />
+                    </circle>
+                    <circle r="4" fill="#10b981" style="animation: flowM2M3 2s linear 1s infinite;">
+                        <animateMotion dur="2s" repeatCount="indefinite" begin="1s" path="M226,60 L150,160" />
+                    </circle>
+                </svg>
+
+                <!-- Machines -->
+                <div class="machine m1">
+                    <div class="m-icon">🖥️</div>
+                    <div class="m-label">Machine 1<br>(Primary)</div>
+                    <span class="m-status" style="background:#bfdbfe;color:#1e40af">✅ Online</span>
+                </div>
+                <div class="machine m2">
+                    <div class="m-icon">🖥️</div>
+                    <div class="m-label">Machine 2<br>(Replica)</div>
+                    <span class="m-status" style="background:#bfdbfe;color:#1e40af">✅ Online</span>
+                </div>
+                <div class="machine m3">
+                    <div class="m-icon">👤</div>
+                    <div class="m-label">Client Requests<br>Always flow</div>
+                    <span class="m-status" style="background:#fef9c3;color:#713f12">📡 Active</span>
+                </div>
+            </div>
+
+            <!-- CP Scenario -->
+            <div class="scenario-card sc-cp" style="margin-top:6px">
+                <div class="sc-title">🔵 CP System — During Partition</div>
+                <div class="sc-row"><span class="sc-icon">✅</span><span>All reads return latest data (consistent)</span>
+                </div>
+                <div class="sc-row"><span class="sc-icon">❌</span><span>System refuses writes → unavailable</span></div>
+                <div class="sc-row"><span class="sc-icon">💡</span><span><em>Use when: banking, tickets,
+                            auth</em></span></div>
+            </div>
+
+            <!-- AP Scenario -->
+            <div class="scenario-card sc-ap" style="margin-top:6px">
+                <div class="sc-title">🟢 AP System — During Partition</div>
+                <div class="sc-row"><span class="sc-icon">✅</span><span>Both nodes keep responding to clients</span>
+                </div>
+                <div class="sc-row"><span class="sc-icon">❌</span><span>May return stale/inconsistent data</span></div>
+                <div class="sc-row"><span class="sc-icon">💡</span><span><em>Use when: feeds, view counts,
+                            catalog</em></span></div>
+            </div>
+
+            <!-- Latency scale -->
+            <div
+                style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; margin-top:6px;">
+                <div style="font-size:10px;font-weight:800;color:#1e3a5f;margin-bottom:5px;">⏱️ Consistency vs Latency
+                    Spectrum</div>
+                <div class="spectrum-wrap">
+                    <div class="spectrum-bar">
+                        <div class="spec-dot dot-cassandra"><span class="dot-label">Cassandra</span>C</div>
+                        <div class="spec-dot dot-dynamo"><span class="dot-label">DynamoDB</span>D</div>
+                        <div class="spec-dot dot-mongo"><span class="dot-label">MongoDB</span>M</div>
+                        <div class="spec-dot dot-mysql"><span class="dot-label">MySQL</span>My</div>
+                        <div class="spec-dot dot-hbase"><span class="dot-label">HBase</span>H</div>
+                        <div class="spec-dot dot-zoo"><span class="dot-label">Zookeeper</span>Z</div>
+                    </div>
+                    <div class="spectrum-labels"><span>Low Latency (AP)</span><span>High Consistency (CP)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ RIGHT PANEL: PACELC FLOW + TABLE ══ -->
+        <div class="panel right">
+            <div class="panel-title">⚡ PACELC Decision Flow &amp; Database Classification</div>
+
+            <!-- PACELC Flow -->
+            <div class="flow-area">
+                <svg class="flow-svg-bg" viewBox="0 0 640 310" preserveAspectRatio="none">
+                    <defs>
+                        <marker id="fArr" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                            <polygon points="0 0, 8 3.5, 0 7" fill="#9ca3af" />
+                        </marker>
+                    </defs>
+                    <!-- Start → Question -->
+                    <line x1="320" y1="46" x2="320" y2="60" class="flow-arrow flow-dashes" />
+                    <!-- Question → YES -->
+                    <path d="M250,90 Q180,90 140,135" class="flow-arrow flow-dashes" />
+                    <text x="155" y="110" font-size="9" fill="#dc2626" font-weight="800">YES</text>
+                    <!-- Question → ELSE -->
+                    <path d="M390,90 Q460,90 500,135" class="flow-arrow flow-dashes" />
+                    <text x="455" y="110" font-size="9" fill="#16a34a" font-weight="800">ELSE</text>
+                    <!-- YES → AP -->
+                    <line x1="86" y1="172" x2="56" y2="204" class="flow-arrow" />
+                    <!-- YES → CP -->
+                    <line x1="174" y1="172" x2="204" y2="204" class="flow-arrow" />
+                    <!-- ELSE → EL -->
+                    <line x1="466" y1="172" x2="436" y2="204" class="flow-arrow" />
+                    <!-- ELSE → EC -->
+                    <line x1="556" y1="172" x2="586" y2="204" class="flow-arrow" />
+                </svg>
+
+                <!-- PACELC initialism breakdown -->
+                <div
+                    style="position:absolute;top:6px;right:10px;font-size:8.5px;text-align:right;color:#6b7280;line-height:1.6;">
+                    <strong style="color:#1e3a5f;">P</strong>artition →
+                    <strong style="color:#dc2626;">A</strong>vailability or
+                    <strong style="color:#1d4ed8;">C</strong>onsistency<br>
+                    <strong style="color:#16a34a;">E</strong>lse (normal) →
+                    <strong style="color:#7c3aed;">L</strong>atency or
+                    <strong style="color:#b45309;">C</strong>onsistency
+                </div>
+
+                <!-- Flow Nodes -->
+                <div class="fnode fn-start">⚡ PACELC</div>
+                <div class="fnode fn-q">Network<br>Partition Occurs?</div>
+
+                <div class="fnode fn-yes" style="font-size:10px;">🔴 Partition = YES<br><span
+                        style="font-size:9px;font-weight:500">Choose A or C</span></div>
+                <div class="fnode fn-no" style="font-size:10px;">🟢 No Partition<br><span
+                        style="font-size:9px;font-weight:500">Choose L or C</span></div>
+
+                <div class="fnode fn-ap">
+                    <div class="fn-box-title">🟢 Stay Available (A)</div>
+                    <div class="fn-box-sub">Serve stale data<br>Never reject requests</div>
+                    <div class="fn-box-eg">Cassandra, CouchDB,<br>Social feeds, DNS</div>
+                </div>
+                <div class="fnode fn-cp">
+                    <div class="fn-box-title">🔵 Stay Consistent (C)</div>
+                    <div class="fn-box-sub">Reject writes if unsafe<br>Return error over stale</div>
+                    <div class="fn-box-eg">Zookeeper, HBase,<br>Banking, IRCTC</div>
+                </div>
+                <div class="fnode fn-el">
+                    <div class="fn-box-title">🟣 Low Latency (L)</div>
+                    <div class="fn-box-sub">Respond fast<br>Sync replicas later</div>
+                    <div class="fn-box-eg">YouTube, Cassandra,<br>DynamoDB, Product list</div>
+                </div>
+                <div class="fnode fn-ec">
+                    <div class="fn-box-title">🟠 High Consistency (C)</div>
+                    <div class="fn-box-sub">Sync all replicas first<br>Then respond to client</div>
+                    <div class="fn-box-eg">IRCTC, Zookeeper,<br>Stock prices, Payments</div>
+                </div>
+            </div>
+
+            <!-- Database Classification Table -->
+            <div style="margin-top:6px;">
+                <div style="font-size:10.5px;font-weight:800;color:#1e3a5f;margin-bottom:4px;">🗄️ PACELC Database
+                    Classification</div>
+                <table class="db-table">
+                    <thead>
+                        <tr>
+                            <th>Database</th>
+                            <th>On Partition</th>
+                            <th>Else (Normal)</th>
+                            <th>Class</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Cassandra</strong></td>
+                            <td><span class="badge badge-ap">A — Available</span></td>
+                            <td><span class="badge badge-l">L — Low Latency</span></td>
+                            <td><strong>PA/EL</strong></td>
+                            <td>Social feeds, IoT, Logs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DynamoDB</strong></td>
+                            <td><span class="badge badge-ap">A — Available</span></td>
+                            <td><span class="badge badge-l">L — Low Latency</span></td>
+                            <td><strong>PA/EL</strong></td>
+                            <td>Shopping carts, User sessions</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MongoDB</strong></td>
+                            <td><span class="badge badge-cp">C — Consistent</span></td>
+                            <td><span class="badge badge-l">L — Low Latency</span></td>
+                            <td><strong>PC/EL</strong></td>
+                            <td>Product catalog, Content mgmt</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Zookeeper</strong></td>
+                            <td><span class="badge badge-cp">C — Consistent</span></td>
+                            <td><span class="badge badge-c">C — Consistent</span></td>
+                            <td><strong>PC/EC</strong></td>
+                            <td>Distributed coordination, Leader election</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HBase</strong></td>
+                            <td><span class="badge badge-cp">C — Consistent</span></td>
+                            <td><span class="badge badge-c">C — Consistent</span></td>
+                            <td><strong>PC/EC</strong></td>
+                            <td>Analytics, Time-series, Hadoop</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MySQL (single)</strong></td>
+                            <td><span class="badge badge-na">N/A</span></td>
+                            <td><span class="badge badge-c">C — Consistent</span></td>
+                            <td><strong>E/C</strong></td>
+                            <td>Traditional OLTP, No distributed concern</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Real World Decision Guide -->
+            <div style="display:flex; gap:6px; margin-top:6px;">
+                <div
+                    style="flex:1; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:8px; padding:7px 10px;">
+                    <div style="font-size:10px;font-weight:800;color:#1e40af;margin-bottom:4px;">🔵 Choose CP When…
+                    </div>
+                    <div style="font-size:9px;color:#1e3a5f;line-height:1.6;">
+                        🏦 Banking / ATM / Payments<br>
+                        🎫 Ticket Booking (IRCTC, Flights)<br>
+                        💹 Stock / Crypto Trading<br>
+                        🔐 User Auth &amp; Blacklisting<br>
+                        ♟️ Real-time Game State
+                    </div>
+                </div>
+                <div
+                    style="flex:1; background:#ecfdf5; border:1.5px solid #6ee7b7; border-radius:8px; padding:7px 10px;">
+                    <div style="font-size:10px;font-weight:800;color:#065f46;margin-bottom:4px;">🟢 Choose AP When…
+                    </div>
+                    <div style="font-size:9px;color:#1e3a5f;line-height:1.6;">
+                        📺 YouTube / Hotstar View Counts<br>
+                        👍 Social Media Likes &amp; Comments<br>
+                        🌐 DNS / CDN Propagation<br>
+                        🛒 Product Catalog &amp; Search<br>
+                        📰 News Feed / Content Discovery
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
