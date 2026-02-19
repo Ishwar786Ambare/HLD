@@ -675,7 +675,33 @@ Removes oldest entries regardless of access
 
 ---
 
-### 4. **Random Replacement**
+### 4. **MRU (Most Recently Used)**
+
+Removes the data that was **most recently accessed** — the opposite of LRU
+
+#### How it Works:
+- Assumes that recently accessed data is **less likely** to be accessed again soon
+- On eviction, removes the item at the **head** (most recently used)
+
+#### When is MRU Useful?:
+```
+Example: Video streaming — once a user finishes watching a movie,
+they are unlikely to watch it again immediately.
+→ Evicting the most recently watched (MRU) makes space for new content
+   without hurting items that users are still browsing.
+
+Example: Database buffer pools — once a full table scan completes,
+those pages won't be needed again soon. Evicting them (MRU) is smarter
+than throwing away pages that are being actively updated.
+```
+
+**Pros:** ✅ Optimal for one-time-access patterns (streaming, full table scans)
+**Cons:** ❌ Counter-intuitive, rarely the right choice for general workloads
+**Best For:** Streaming services, sequential scan workloads
+
+---
+
+### 5. **Random Replacement**
 
 Randomly selects entry to evict
 
@@ -691,6 +717,7 @@ Randomly selects entry to evict
 | **LRU** | High | Medium | Medium (HashMap+DLL) | General purpose |
 | **LFU** | Very High | High | High (counters) | Stable workloads |
 | **FIFO** | Low | Low | Low (queue) | Simple caching |
+| **MRU** | Situational | Medium | Medium | Streaming, table scans |
 | **Random** | Low | Very Low | Very Low | Testing |
 
 ---
