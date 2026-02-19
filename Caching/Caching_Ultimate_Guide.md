@@ -675,6 +675,7 @@ Removes oldest entries regardless of access
 
 ---
 
+
 ### 4. **MRU (Most Recently Used)**
 
 Removes the data that was **most recently accessed** — the opposite of LRU
