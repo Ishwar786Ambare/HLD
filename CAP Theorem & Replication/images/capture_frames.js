@@ -4,8 +4,8 @@ const fs = require('fs');
 
 const HTML_FILE = path.resolve(__dirname, 'cap_animation.html');
 const FRAMES_DIR = path.resolve(__dirname, 'frames');
-const WIDTH = 1400;
-const HEIGHT = 800;
+const WIDTH = 1550;
+const HEIGHT = 900;
 
 // All looping animations run on a ~4s cycle.
 // We capture 60 frames across one full 4000ms loop → 15 fps

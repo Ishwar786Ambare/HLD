@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #080f1e;
+            color: #e2e8f0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            width: 1700px;
+        }
+
+        /* ── TITLE ── */
+        .hdr {
+            background: linear-gradient(135deg, #0d1a35 0%, #0a1628 100%);
+            border-bottom: 2px solid #1e3a6e;
+            padding: 22px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hdr h1 {
+            font-size: 30px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hdr .sub {
+            font-size: 12px;
+            color: #475569;
+            margin-top: 5px;
+        }
+
+        .pill {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            margin: 3px;
+        }
+
+        /* ── GRID ── */
+        .grid {
+            display: grid;
+            grid-template-columns: 520px 1fr 520px;
+            gap: 20px;
+            padding: 20px 24px 0;
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: #0c1628;
+            border: 1px solid #1e3a6e;
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 900;
+            color: #60a5fa;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #1e3a6e;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .icon {
+            font-size: 18px;
+        }
+
+        /* ═══════════ LEFT — CAP TRIANGLE ═══════════ */
+        .tri-wrap {
+            position: relative;
+            height: 300px;
+            margin-bottom: 10px;
+        }
+
+        .tri-wrap svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .vnode {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .vnode .letter {
+            font-size: 34px;
+            line-height: 1;
+        }
+
+        .vnode .name {
+            font-size: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-top: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .vn-c {
+            background: radial-gradient(circle at 35% 35%, #3b82f6, #1e3a8a);
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .vn-a {
+            background: radial-gradient(circle at 35% 35%, #10b981, #064e3b);
+            bottom: 0;
+            left: 0;
+        }
+
+        .vn-p {
+            background: radial-gradient(circle at 35% 35%, #f59e0b, #78350f);
+            bottom: 0;
+            right: 0;
+        }
+
+        .e-lbl {
+            position: absolute;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid;
+            background: #080f1e;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .e-cp {
+            top: 120px;
+            right: -20px;
+            color: #60a5fa;
+            border-color: #1d4ed8;
+        }
+
+        .e-ca {
+            top: 120px;
+            left: -20px;
+            color: #a78bfa;
+            border-color: #4c1d95;
+        }
+
+        .e-ap {
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #34d399;
+            border-color: #047857;
+        }
+
+        .e-lbl small {
+            display: block;
+            font-size: 8px;
+            font-weight: 400;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        .center-badge {
+            position: absolute;
+            top: 54%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(245, 158, 11, 0.10);
+            border: 2px dashed rgba(245, 158, 11, 0.5);
+            border-radius: 50%;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 9px;
+            font-weight: 800;
+            color: #fbbf24;
+            line-height: 1.4;
+        }
+
+        /* Definition pills */
+        .def-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .def-box {
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid;
+        }
+
+        .def-letter {
+            font-size: 28px;
+            font-weight: 900;
+            display: block;
+        }
+
+        .def-name {
+            font-size: 10px;
+            font-weight: 800;
+            margin: 3px 0 6px;
+            display: block;
+        }
+
+        .def-desc {
+            font-size: 9px;
+            line-height: 1.5;
+            opacity: 0.75;
+        }
+
+        .def-c {
+            border-color: #1d4ed8;
+            background: rgba(59, 130, 246, 0.07);
+        }
+
+        .def-c .def-letter {
+            color: #60a5fa;
+        }
+
+        .def-a {
+            border-color: #047857;
+            background: rgba(16, 185, 129, 0.07);
+        }
+
+        .def-a .def-letter {
+            color: #34d399;
+        }
+
+        .def-p {
+            border-color: #b45309;
+            background: rgba(245, 158, 11, 0.07);
+        }
+
+        .def-p .def-letter {
+            color: #fbbf24;
+        }
+
+        /* P is mandatory callout */
+        .mandatory-box {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fca5a5;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* ═══════════ MIDDLE — CP vs AP ═══════════ */
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .cmp-box {
+            border-radius: 14px;
+            padding: 18px;
+            border: 2px solid;
+        }
+
+        .cmp-box.cp-box {
+            border-color: #1d4ed8;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .cmp-box.ap-box {
+            border-color: #047857;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .cmp-title {
+            font-size: 16px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cmp-box.cp-box .cmp-title {
+            color: #60a5fa;
+        }
+
+        .cmp-box.ap-box .cmp-title {
+            color: #34d399;
+        }
+
+        .cmp-tagline {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+
+        .cmp-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 10px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .cmp-row .tick {
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-top: 0px;
+        }
+
+        .cmp-examples {
+            margin-top: 14px;
+        }
+
+        .cmp-ex-title {
+            font-size: 9px;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .ex-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .ex-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid;
+        }
+
+        .cp-chip {
+            border-color: #1d4ed8;
+            color: #93c5fd;
+            background: rgba(29, 78, 216, 0.1);
+        }
+
+        .ap-chip {
+            border-color: #047857;
+            color: #6ee7b7;
+            background: rgba(4, 120, 87, 0.1);
+        }
+
+        /* Story box */
+        .story-box {
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 10px;
+            color: #fde68a;
+            line-height: 1.8;
+        }
+
+        .story-box strong {
+            color: #fbbf24;
+        }
+
+        .story-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 4px;
+            align-items: baseline;
+        }
+
+        .story-row .step {
+            font-size: 9px;
+            font-weight: 800;
+            color: #f59e0b;
+            min-width: 28px;
+        }
+
+        .s-ok {
+            color: #34d399;
+            font-weight: 700;
+        }
+
+        .s-err {
+            color: #f87171;
+            font-weight: 700;
+        }
+
+        /* ═══════════ RIGHT — PACELC + MASTER-SLAVE ═══════════ */
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* PACELC diagram */
+        .pacelc-big {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            padding: 10px 0;
+        }
+
+        .pf-box {
+            padding: 10px 28px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 2px solid;
+            text-align: center;
+            min-width: 180px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pf-box.root {
+            border-color: #f59e0b;
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.08);
+            font-size: 14px;
+            padding: 12px 36px;
+        }
+
+        .pf-box.q {
+            border-color: #ef4444;
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .pf-box.yes {
+            border-color: #ef4444;
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.06);
+            font-size: 10px;
+        }
+
+        .pf-box.no {
+            border-color: #10b981;
+            color: #6ee7b7;
+            background: rgba(16, 185, 129, 0.06);
+            font-size: 10px;
+        }
+
+        .pf-box.leaf {
+            font-size: 10px;
+            min-width: 0;
+            padding: 8px 14px;
+        }
+
+        .pf-box.leaf.a {
+            border-color: #34d399;
+            color: #34d399;
+            background: rgba(52, 211, 153, 0.07);
+        }
+
+        .pf-box.leaf.c {
+            border-color: #60a5fa;
+            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.07);
+        }
+
+        .pf-box.leaf.l {
+            border-color: #c084fc;
+            color: #c084fc;
+            background: rgba(192, 132, 252, 0.07);
+        }
+
+        .pf-box.leaf.ec {
+            border-color: #fbbf24;
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.07);
+        }
+
+        .arr {
+            width: 2px;
+            height: 20px;
+            background: #1e3a6e;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .arr::after {
+            content: '▼';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: #334155;
+        }
+
+        .fork {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .branch-label {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+        }
+
+        .branch-label.y {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .branch-label.n {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .arr-y {
+            width: 2px;
+            height: 16px;
+            background: #ef4444;
+            margin: 0 auto;
+        }
+
+        .arr-n {
+            width: 2px;
+            height: 16px;
+            background: #10b981;
+            margin: 0 auto;
+        }
+
+        .leaf-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        /* PACELC table */
+        .ptbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+
+        .ptbl th {
+            background: #050c1a;
+            color: #475569;
+            padding: 6px 8px;
+            font-size: 9px;
+            text-transform: uppercase;
+            font-weight: 800;
+            text-align: left;
+        }
+
+        .ptbl td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #0f1e36;
+            color: #94a3b8;
+        }
+
+        .ptbl tr:last-child td {
+            border: none;
+        }
+
+        .ptbl td b {
+            color: #e2e8f0;
+        }
+
+        .tc-ap {
+            color: #34d399;
+            font-weight: 800;
+        }
+
+        .tc-cp {
+            color: #60a5fa;
+            font-weight: 800;
+        }
+
+        .tc-el {
+            color: #c084fc;
+            font-weight: 800;
+        }
+
+        .tc-ec {
+            color: #fbbf24;
+            font-weight: 800;
+        }
+
+        /* Master-Slave */
+        .ms-wrap {
+            display: flex;
+            gap: 0;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .ms-node {
+            background: #0f1c32;
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 12px 10px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .ms-node .n-icon {
+            font-size: 22px;
+            display: block;
+        }
+
+        .ms-node .n-label {
+            font-size: 9px;
+            font-weight: 800;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        .ms-node.master {
+            border-color: #3b82f6;
+        }
+
+        .ms-node.master .n-label {
+            color: #60a5fa;
+        }
+
+        .ms-node.replica {
+            border-color: #10b981;
+        }
+
+        .ms-node.replica .n-label {
+            color: #34d399;
+        }
+
+        .ms-node.user {
+            border-color: #f59e0b;
+        }
+
+        .ms-node.user .n-label {
+            color: #fbbf24;
+        }
+
+        .ms-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 0 8px;
+        }
+
+        .ms-arrow .ms-line {
+            width: 50px;
+            height: 2px;
+        }
+
+        .ms-arrow .ms-line.w {
+            background: #3b82f6;
+        }
+
+        .ms-arrow .ms-line.r {
+            background: #10b981;
+        }
+
+        .ms-arrow .ms-lbl {
+            font-size: 8px;
+            font-weight: 800;
+        }
+
+        .ms-arrow .ms-lbl.w {
+            color: #60a5fa;
+        }
+
+        .ms-arrow .ms-lbl.r {
+            color: #34d399;
+        }
+
+        .ms-replicas {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ms-arrow-vert {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ms-arrow-vert .av-line {
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(#10b981, #047857);
+        }
+
+        .rule-box {
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            font-size: 9px;
+            font-weight: 700;
+            border-left: 3px solid;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .rule-box b {
+            color: #e2e8f0;
+        }
+
+        /* ═══════════ BOTTOM ROW — SHARDING vs REPLICATION ═══════════ */
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 60px 1fr 1fr 1fr;
+            gap: 0;
+            margin: 16px 24px 0;
+            align-items: stretch;
+        }
+
+        .bot-card {
+            background: #0c1628;
+            border: 1px solid #1e3a6e;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bot-card:not(:last-child) {
+            margin-right: 16px;
+        }
+
+        .bot-title {
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid #1e3a6e;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vs-col {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            color: #334155;
+        }
+
+        .node-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+
+        .nd {
+            width: 60px;
+            padding: 8px 4px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 9px;
+            font-weight: 700;
+            border: 1px solid;
+            line-height: 1.4;
+        }
+
+        .nd-shard {
+            border-color: #1d4ed8;
+            color: #93c5fd;
+            background: rgba(29, 78, 216, 0.1);
+        }
+
+        .nd-rep {
+            border-color: #047857;
+            color: #6ee7b7;
+            background: rgba(4, 120, 87, 0.1);
+        }
+
+        .fact-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .fact-list li {
+            font-size: 9px;
+            color: #64748b;
+            padding-left: 12px;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .fact-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #334155;
+        }
+
+        .fact-list li b {
+            color: #94a3b8;
+        }
+
+        .fact-list li .ok {
+            color: #34d399;
+        }
+
+        .fact-list li .nok {
+            color: #f87171;
+        }
+
+        /* Spectrum bar */
+        .spectrum {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #f59e0b, #10b981);
+            height: 10px;
+            border-radius: 5px;
+            margin: 6px 0;
+        }
+
+        .spectrum-lbl {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        /* Footer */
+        .footer {
+            margin: 16px 24px 0;
+            border-top: 1px solid #1e3a6e;
+            padding: 10px 0 16px;
+            font-size: 8px;
+            color: #1e3a6e;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="hdr">
+        <div>
+            <h1>🚀 CAP Theorem, PACELC &amp; Replication — Visual Reference</h1>
+            <div class="sub">Scaler Academy HLD Module · Tarun Malhotra (Google) · Feb 2026</div>
+        </div>
+        <div>
+            <span class="pill">CAP Theorem</span>
+            <span class="pill">PACELC</span>
+            <span class="pill">Sharding</span>
+            <span class="pill">Replication</span>
+            <span class="pill">Master-Slave</span>
+        </div>
+    </div>
+
+    <!-- TOP 3-COL GRID -->
+    <div class="grid">
+
+        <!-- ══ LEFT — CAP TRIANGLE ══ -->
+        <div class="card">
+            <div class="card-title"><span class="icon">📐</span> What is CAP Theorem?</div>
+
+            <!-- Definitions first (easy to understand) -->
+            <div class="def-grid">
+                <div class="def-box def-c">
+                    <span class="def-letter">C</span>
+                    <span class="def-name">Consistency</span>
+                    <span class="def-desc">Every read returns the <b>LATEST</b> write — never stale data</span>
+                </div>
+                <div class="def-box def-a">
+                    <span class="def-letter">A</span>
+                    <span class="def-name">Availability</span>
+                    <span class="def-desc">System <b>ALWAYS</b> responds — even if data is slightly old</span>
+                </div>
+                <div class="def-box def-p">
+                    <span class="def-letter">P</span>
+                    <span class="def-name">Partition Tolerance</span>
+                    <span class="def-desc">System keeps working even if <b>network breaks</b> between nodes</span>
+                </div>
+            </div>
+
+            <!-- Triangle -->
+            <div class="tri-wrap">
+                <svg width="470" height="300" viewBox="0 0 470 300">
+                    <!-- Zone fills -->
+                    <polygon points="235,42 410,285 315,285" fill="#3b82f6" opacity="0.12" />
+                    <polygon points="235,42 155,285 315,285" fill="#10b981" opacity="0.10" />
+                    <polygon points="235,42 55,285 155,285" fill="#8b5cf6" opacity="0.08" />
+                    <!-- Main triangle -->
+                    <path d="M235,42 L410,285 H55 Z" stroke="#2d4a7a" stroke-width="2.5" fill="none"
+                        stroke-linejoin="round" />
+                    <!-- Dashed dividers -->
+                    <line x1="235" y1="42" x2="315" y2="285" stroke="#1e3a6e" stroke-dasharray="5,4"
+                        stroke-width="1.5" />
+                    <line x1="235" y1="42" x2="155" y2="285" stroke="#1e3a6e" stroke-dasharray="5,4"
+                        stroke-width="1.5" />
+                    <!-- Zone labels -->
+                    <text x="362" y="215" text-anchor="middle" font-size="11" font-weight="800" fill="#60a5fa"
+                        opacity="0.8" font-family="Inter, sans-serif">CP</text>
+                    <text x="235" y="272" text-anchor="middle" font-size="11" font-weight="800" fill="#34d399"
+                        opacity="0.8" font-family="Inter, sans-serif">AP</text>
+                    <text x="108" y="215" text-anchor="middle" font-size="11" font-weight="800" fill="#a78bfa"
+                        opacity="0.8" font-family="Inter, sans-serif">CA</text>
+                </svg>
+                <div class="vnode vn-c"><span class="letter">C</span><span class="name">Consistency</span></div>
+                <div class="vnode vn-a"><span class="letter">A</span><span class="name">Availability</span></div>
+                <div class="vnode vn-p"><span class="letter">P</span><span class="name">Partition</span></div>
+                <div class="e-lbl e-cp">CP System<small>Banking · IRCTC · Zerodha</small></div>
+                <div class="e-lbl e-ca">CA System<small>Single-node SQL only</small></div>
+                <div class="e-lbl e-ap">AP System<small>YouTube · Hotstar · DNS</small></div>
+                <div class="center-badge">⚠️<br>Pick only<br>2 of 3</div>
+            </div>
+
+            <!-- Key rule -->
+            <div class="mandatory-box">
+                🌐 In distributed systems, <b>network partitions ALWAYS happen</b> — so P is non-negotiable.<br>
+                The real choice is always: <b style="color:#60a5fa">CP</b> (consistency first) &nbsp;or&nbsp; <b
+                    style="color:#34d399">AP</b> (availability first)
+            </div>
+        </div>
+
+        <!-- ══ MIDDLE — CP vs AP Comparison ══ -->
+        <div class="card">
+            <div class="card-title"><span class="icon">⚖️</span> CP vs AP — Side by Side</div>
+
+            <div class="compare">
+                <!-- CP -->
+                <div class="cmp-box cp-box">
+                    <div class="cmp-title">🔵 CP System</div>
+                    <div class="cmp-tagline">Consistency + Partition Tolerance</div>
+                    <div class="cmp-row"><span class="tick">✅</span><span>Every read returns the <b>latest correct
+                                data</b></span></div>
+                    <div class="cmp-row"><span class="tick">✅</span><span>Refuses to return stale data — returns <b>an
+                                error</b> instead</span></div>
+                    <div class="cmp-row"><span class="tick">❌</span><span>System becomes <b>unavailable</b> if a node
+                            goes down (can't sync)</span></div>
+                    <div class="cmp-row"><span class="tick">⚡</span><span>Higher write <b>latency</b> (must wait for all
+                            replicas to confirm)</span></div>
+                    <div class="cmp-examples">
+                        <div class="cmp-ex-title">Real-world examples</div>
+                        <div class="ex-row">
+                            <span class="ex-chip cp-chip">🏦 Bank ATM</span>
+                            <span class="ex-chip cp-chip">🎫 IRCTC</span>
+                            <span class="ex-chip cp-chip">📈 Zerodha</span>
+                            <span class="ex-chip cp-chip">♟️ Chess</span>
+                        </div>
+                        <div style="font-size:9px; color:#475569; margin-top:8px; line-height:1.6;">
+                            → Wrong balance / double-booked seat = catastrophic<br>
+                            → Worth being slow or temporarily down to stay correct
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AP -->
+                <div class="cmp-box ap-box">
+                    <div class="cmp-title">🟢 AP System</div>
+                    <div class="cmp-tagline">Availability + Partition Tolerance</div>
+                    <div class="cmp-row"><span class="tick">✅</span><span>System <b>always responds</b> — never fails
+                            with an error</span></div>
+                    <div class="cmp-row"><span class="tick">✅</span><span><b>Low latency</b> — writes are acknowledged
+                            immediately</span></div>
+                    <div class="cmp-row"><span class="tick">❌</span><span>During partition, different nodes may return
+                            <b>different / stale data</b></span></div>
+                    <div class="cmp-row"><span class="tick">🔄</span><span>Uses <b>Eventual Consistency</b> — all nodes
+                            sync up later</span></div>
+                    <div class="cmp-examples">
+                        <div class="cmp-ex-title">Real-world examples</div>
+                        <div class="ex-row">
+                            <span class="ex-chip ap-chip">▶️ YouTube Views</span>
+                            <span class="ex-chip ap-chip">📺 Hotstar Count</span>
+                            <span class="ex-chip ap-chip">🌐 DNS</span>
+                            <span class="ex-chip ap-chip">❤️ Social Likes</span>
+                        </div>
+                        <div style="font-size:9px; color:#475569; margin-top:8px; line-height:1.6;">
+                            → Showing "10,238" vs "10,242" views is fine<br>
+                            → Being down is much worse than showing slight stale count
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Hardep & Nikl Story — simplified -->
+            <div class="story-box">
+                <div style="font-size:11px; font-weight:800; color:#f59e0b; margin-bottom:10px;">
+                    📖 The Hardep &amp; Nikl Story — How Partitions Work in Practice
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:9px;">
+                    <div>
+                        <div style="color:#60a5fa; font-weight:800; margin-bottom:6px;">🔵 CP Behaviour (when Nikl is
+                            offline)</div>
+                        <div class="story-row"><span class="step">1.</span> Shiv registers event → routed to Hardep
+                        </div>
+                        <div class="story-row"><span class="step">2.</span> Hardep writes in diary ✅</div>
+                        <div class="story-row"><span class="step">3.</span> Hardep calls Nikl to sync… <span
+                                class="s-err">No answer!</span></div>
+                        <div class="story-row"><span class="step">4.</span> <span class="s-err">Hardep cannot confirm →
+                                writes FAIL</span></div>
+                        <div class="story-row"><span class="step">5.</span> System says "Sorry, try later" ←
+                            <b>Unavailable but correct</b></div>
+                    </div>
+                    <div>
+                        <div style="color:#34d399; font-weight:800; margin-bottom:6px;">🟢 AP Behaviour (when Nikl is
+                            offline)</div>
+                        <div class="story-row"><span class="step">1.</span> Shiv registers event → routed to Hardep
+                        </div>
+                        <div class="story-row"><span class="step">2.</span> Hardep writes &amp; replies immediately ✅
+                        </div>
+                        <div class="story-row"><span class="step">3.</span> Nikl is offline — write never synced ⚠️
+                        </div>
+                        <div class="story-row"><span class="step">4.</span> Shiv calls back → routed to Nikl</div>
+                        <div class="story-row"><span class="step">5.</span> <span class="s-err">Nikl: "No
+                                events!"</span> ← Available but stale data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ RIGHT — PACELC + Master-Slave ══ -->
+        <div class="right-col">
+
+            <!-- PACELC -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚡</span> PACELC — Extends CAP</div>
+                <div
+                    style="font-size:9px; color:#64748b; margin-bottom:12px; line-height:1.7; padding:10px; background:#080f1e; border-radius:8px; border:1px solid #1e3a6e;">
+                    <b style="color:#fbbf24">CAP tells you what happens during a partition.</b> PACELC asks: <b
+                        style="color:#c084fc">what about normal operation?</b><br>
+                    Even without a partition, you trade:<br>
+                    <b style="color:#fbbf24">Strong Consistency</b> (wait for all replicas) &nbsp;↔&nbsp; <b
+                        style="color:#c084fc">Low Latency</b> (respond immediately)
+                </div>
+
+                <div class="pacelc-big">
+                    <div class="pf-box root">Distributed System</div>
+                    <div class="arr"></div>
+                    <div class="pf-box q">Network Partition?</div>
+                    <div style="height:14px; position:relative; width:100%; margin-top:0;">
+                        <div style="position:absolute; left:25%; width:2px; height:14px; background:#ef4444;"></div>
+                        <div style="position:absolute; right:25%; width:2px; height:14px; background:#10b981;"></div>
+                    </div>
+                    <div class="fork">
+                        <div class="branch">
+                            <span class="branch-label y">YES (Partition)</span>
+                            <div class="arr-y"></div>
+                            <div class="pf-box yes" style="width:100%; text-align:center;">Apply CAP</div>
+                            <div class="arr-y"></div>
+                            <div class="leaf-pair">
+                                <div class="pf-box leaf a" style="text-align:center; font-size:9px;">Choose A<br><span
+                                        style="opacity:0.6">Stay up, stale OK</span></div>
+                                <div class="pf-box leaf c" style="text-align:center; font-size:9px;">Choose C<br><span
+                                        style="opacity:0.6">Only correct data</span></div>
+                            </div>
+                        </div>
+                        <div class="branch">
+                            <span class="branch-label n">NO (Else = Normal)</span>
+                            <div class="arr-n"></div>
+                            <div class="pf-box no" style="width:100%; text-align:center;">Normal Operation</div>
+                            <div class="arr-n"></div>
+                            <div class="leaf-pair">
+                                <div class="pf-box leaf l" style="text-align:center; font-size:9px;">Choose L<br><span
+                                        style="opacity:0.6">Fast response</span></div>
+                                <div class="pf-box leaf ec" style="text-align:center; font-size:9px;">Choose C<br><span
+                                        style="opacity:0.6">Always sync first</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="ptbl" style="margin-top:12px;">
+                    <tr>
+                        <th>Database</th>
+                        <th>During Partition</th>
+                        <th>Normal Ops</th>
+                        <th>Class</th>
+                    </tr>
+                    <tr>
+                        <td><b>Cassandra</b></td>
+                        <td class="tc-ap">Availability (PA)</td>
+                        <td class="tc-el">Low Latency (EL)</td>
+                        <td style="color:#64748b">Wide-Column</td>
+                    </tr>
+                    <tr>
+                        <td><b>DynamoDB</b></td>
+                        <td class="tc-ap">Availability (PA)</td>
+                        <td class="tc-el">Low Latency (EL)</td>
+                        <td style="color:#64748b">Key-Value</td>
+                    </tr>
+                    <tr>
+                        <td><b>MongoDB</b></td>
+                        <td class="tc-cp">Consistency (PC)</td>
+                        <td class="tc-ec">Consistency (EC)</td>
+                        <td style="color:#64748b">Document</td>
+                    </tr>
+                    <tr>
+                        <td><b>Zookeeper</b></td>
+                        <td class="tc-cp">Consistency (PC)</td>
+                        <td class="tc-ec">Consistency (EC)</td>
+                        <td style="color:#64748b">Coordination</td>
+                    </tr>
+                    <tr>
+                        <td><b>MySQL (1 node)</b></td>
+                        <td style="color:#334155">N/A</td>
+                        <td class="tc-ec">Consistency (EC)</td>
+                        <td style="color:#64748b">Relational</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Master-Slave -->
+            <div class="card">
+                <div class="card-title"><span class="icon">👑</span> Master-Slave Replication</div>
+
+                <div class="ms-wrap">
+                    <div class="ms-node user"><span class="n-icon">👤</span><span class="n-label">Client</span></div>
+                    <div class="ms-arrow">
+                        <span class="ms-lbl w">WRITES →</span>
+                        <div class="ms-line w"></div>
+                        <div class="ms-line r"></div>
+                        <span class="ms-lbl r">← READS</span>
+                    </div>
+                    <div class="ms-node master"><span class="n-icon">👑</span><span
+                            class="n-label">MASTER<br>(Primary)</span></div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:4px; padding:0 8px;">
+                        <span style="font-size:8px; color:#10b981; font-weight:700;">async/sync</span>
+                        <div style="width:40px; height:2px; background:#10b981;"></div>
+                        <span style="font-size:9px; color:#334155;">▶▶</span>
+                    </div>
+                    <div class="ms-replicas">
+                        <div class="ms-node replica"><span class="n-icon">📑</span><span class="n-label">Replica
+                                1</span></div>
+                        <div class="ms-node replica"><span class="n-icon">📑</span><span class="n-label">Replica
+                                2</span></div>
+                    </div>
+                </div>
+
+                <div class="rule-box" style="border-color:#3b82f6;"><b style="color:#60a5fa">WRITES</b>
+                    (INSERT/UPDATE/DELETE) → <b>Master ONLY</b></div>
+                <div class="rule-box" style="border-color:#10b981;"><b style="color:#34d399">READS</b> (SELECT) → <b>Any
+                        Replica</b> (80–90% of traffic)</div>
+
+                <!-- Why? -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;">
+                    <div style="background:#080f1e; border:1px solid #1e3a6e; border-radius:8px; padding:10px;">
+                        <div style="font-size:9px; font-weight:800; color:#60a5fa; margin-bottom:6px;">⚡ Sync
+                            Replication</div>
+                        <div style="font-size:8px; color:#64748b; line-height:1.6;">
+                            <span style="color:#34d399">✅</span> All replicas always match<br>
+                            <span style="color:#34d399">✅</span> Strong consistency<br>
+                            <span style="color:#f87171">❌</span> High write latency<br>
+                            <span style="color:#f87171">❌</span> Slow = slowest replica
+                        </div>
+                    </div>
+                    <div style="background:#080f1e; border:1px solid #1e3a6e; border-radius:8px; padding:10px;">
+                        <div style="font-size:9px; font-weight:800; color:#34d399; margin-bottom:6px;">🔄 Async
+                            Replication</div>
+                        <div style="font-size:8px; color:#64748b; line-height:1.6;">
+                            <span style="color:#34d399">✅</span> Very fast writes<br>
+                            <span style="color:#34d399">✅</span> Good availability<br>
+                            <span style="color:#f87171">❌</span> Replication lag exists<br>
+                            <span style="color:#f87171">❌</span> Stale reads possible
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end right-col -->
+    </div><!-- end .grid -->
+
+    <!-- ═══════════ BOTTOM ROW — SHARDING vs REPLICATION ═══════════ -->
+    <div class="bottom-row">
+
+        <!-- Sharding -->
+        <div class="bot-card">
+            <div class="bot-title" style="color:#60a5fa;">🔀 Sharding (Partitioning)</div>
+            <div class="node-row">
+                <div class="nd nd-shard">Shard A<br>Users 1–1B</div>
+                <div class="nd nd-shard">Shard B<br>Users 1B–2B</div>
+                <div class="nd nd-shard">Shard C<br>Users 2B–3B</div>
+            </div>
+            <div style="font-size:10px; font-weight:800; color:#334155; text-align:center; margin: 4px 0;">↑ DIFFERENT
+                data on each machine</div>
+            <ul class="fact-list">
+                <li><b>Problem solved:</b> Too much <span class="nok">data storage</span> for one machine</li>
+                <li><b>Sharding keys:</b> User ID, Geography, Time, Consistent Hash</li>
+                <li><b>Co-location rule:</b> Related data in same shard → fast <span class="ok">intrashard</span> query
+                </li>
+                <li><span class="nok">⚠ Hot Shard:</span> One shard gets too much traffic (Justin Bieber problem)</li>
+                <li><b>Fix hot shard:</b> Dedicated shard + high replication count + CDN caching</li>
+                <li><b>WhatsApp:</b> Shard key = <b>Conversation ID</b> (all messages in one shard)</li>
+            </ul>
+        </div>
+
+        <div class="vs-col">VS</div>
+
+        <!-- Replication -->
+        <div class="bot-card">
+            <div class="bot-title" style="color:#34d399;">🔁 Replication (Copying)</div>
+            <div class="node-row">
+                <div class="nd nd-rep">Replica 1<br>ALL data</div>
+                <div class="nd nd-rep">Replica 2<br>ALL data</div>
+                <div class="nd nd-rep">Replica 3<br>ALL data</div>
+            </div>
+            <div style="font-size:10px; font-weight:800; color:#334155; text-align:center; margin: 4px 0;">↑ SAME data
+                on every machine</div>
+            <ul class="fact-list">
+                <li><b>Problem solved:</b> Too many <span class="nok">read requests</span> for one machine</li>
+                <li><b>Pattern:</b> 1 Master (writes) + N Replicas (reads)</li>
+                <li><b>Replication lag:</b> T+0ms Master has write; T+50ms replica gets it</li>
+                <li><span class="nok">⚠ Read-Your-Write issue:</span> User may not see own write immediately</li>
+                <li><b>Fix:</b> Route user's reads to master briefly right after their write</li>
+                <li><b>Both work together:</b> N shards × M replicas = total machines</li>
+            </ul>
+        </div>
+
+        <!-- Latency Spectrum -->
+        <div class="bot-card">
+            <div class="bot-title" style="color:#fbbf24;">⏱️ Consistency vs Latency Spectrum</div>
+            <div class="spectrum-lbl"><span style="color:#3b82f6">← Strong Consistency (Slow)</span><span
+                    style="color:#10b981">Low Latency (Fast) →</span></div>
+            <div class="spectrum"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:6px; margin-top:8px;">
+                <div style="text-align:center; font-size:8px;">
+                    <div style="font-size:18px;">🏦</div>
+                    <div style="font-weight:800; color:#3b82f6;">Bank ATM</div>
+                    <div style="color:#475569;">Wrong balance = catastrophic</div>
+                </div>
+                <div style="text-align:center; font-size:8px;">
+                    <div style="font-size:18px;">🎫</div>
+                    <div style="font-weight:800; color:#6366f1;">IRCTC</div>
+                    <div style="color:#475569;">2-3s wait acceptable, no double-book</div>
+                </div>
+                <div style="text-align:center; font-size:8px;">
+                    <div style="font-size:18px;">📈</div>
+                    <div style="font-weight:800; color:#8b5cf6;">Zerodha</div>
+                    <div style="color:#475569;">Wrong price = bad trades</div>
+                </div>
+                <div style="text-align:center; font-size:8px;">
+                    <div style="font-size:18px;">🌐</div>
+                    <div style="font-weight:800; color:#f59e0b;">DNS</div>
+                    <div style="color:#475569;">TTL lag OK. Must stay up.</div>
+                </div>
+                <div style="text-align:center; font-size:8px;">
+                    <div style="font-size:18px;">▶️</div>
+                    <div style="font-weight:800; color:#10b981;">YouTube</div>
+                    <div style="color:#475569;">Approx view count is totally fine</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Cheatsheet -->
+        <div class="bot-card">
+            <div class="bot-title" style="color:#a78bfa;">📋 Quick Interview Cheatsheet</div>
+            <ul class="fact-list" style="gap:7px;">
+                <li><b>CAP</b> → Can only guarantee 2 of 3. P is always required → Real choice = CP or AP</li>
+                <li><b>CP examples</b> → Banking, IRCTC, Zerodha, Zookeeper, HBase, MongoDB</li>
+                <li><b>AP examples</b> → YouTube views, Hotstar, DNS, Cassandra, DynamoDB, CouchDB</li>
+                <li><b>PACELC</b> → Even without partition: choose Low Latency (L) or Consistency (C)</li>
+                <li><b>PA/EL</b> → Cassandra, DynamoDB (AP + fast) &nbsp;|&nbsp; <b>PC/EC</b> → Zookeeper, HBase (CP +
+                    consistent)</li>
+                <li><b>Write</b> → Master only &nbsp;|&nbsp; <b>Read</b> → Replicas (80–90% of all traffic)</li>
+                <li><b>Shard key</b> → WhatsApp = Conversation ID, Facebook = User ID, Logs = Time</li>
+                <li><b>IRCTC 2-3s delay</b> after booking = system ensuring no double-booking (CP in action)</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <span>CAP Theorem: Eric Brewer (2000), Gilbert &amp; Lynch (2002) · PACELC: Daniel J. Abadi (2012) · Ref: DDIA
+            (Kleppmann) Chapters 5, 6, 9</span>
+        <span>C = Consistency · A = Availability · P = Partition Tolerance · E = Else · L = Latency · CP/AP/PA/EL/EC =
+            PACELC classifications</span>
+    </div>
+
+</body>
+
+</html>

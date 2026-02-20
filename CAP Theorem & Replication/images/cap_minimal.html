@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            width: 1200px;
+            color: #0f172a;
+        }
+
+        /* ── TOP LABEL ── */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px 60px 0;
+        }
+
+        .top-bar .title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .top-bar .sub {
+            font-size: 12px;
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+
+        /* ── MAIN AREA ── */
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 480px 1fr;
+            gap: 0;
+            padding: 20px 50px 30px;
+            align-items: center;
+        }
+
+        /* ── LEFT DEFS ── */
+        .defs {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .def {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            opacity: 0.9;
+        }
+
+        .def-dot {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .def-dot.c {
+            background: #2563eb;
+        }
+
+        .def-dot.a {
+            background: #059669;
+        }
+
+        .def-dot.p {
+            background: #d97706;
+        }
+
+        .def-text {}
+
+        .def-name {
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 3px;
+        }
+
+        .def-name.c {
+            color: #1d4ed8;
+        }
+
+        .def-name.a {
+            color: #047857;
+        }
+
+        .def-name.p {
+            color: #b45309;
+        }
+
+        .def-desc {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.5;
+            max-width: 200px;
+        }
+
+        /* ── TRIANGLE AREA ── */
+        .tri-wrap {
+            position: relative;
+            height: 430px;
+        }
+
+        .tri-wrap svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .vnode {
+            position: absolute;
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #fff;
+            text-align: center;
+        }
+
+        .vnode .letter {
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .vnode .name {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.85;
+            margin-top: 3px;
+        }
+
+        .vn-c {
+            background: #2563eb;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+        }
+
+        .vn-a {
+            background: #059669;
+            bottom: 0;
+            left: 0;
+            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35);
+        }
+
+        .vn-p {
+            background: #d97706;
+            bottom: 0;
+            right: 0;
+            box-shadow: 0 8px 24px rgba(217, 119, 6, 0.35);
+        }
+
+        .zone-lbl {
+            position: absolute;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .zl-cp {
+            top: 130px;
+            right: 12px;
+            color: #2563eb;
+        }
+
+        .zl-ap {
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #059669;
+        }
+
+        .zl-ca {
+            top: 130px;
+            left: 12px;
+            color: #7c3aed;
+        }
+
+        /* Center circle */
+        .ctr-ring {
+            position: absolute;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 86px;
+            height: 86px;
+            border-radius: 50%;
+            border: 2px dashed #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 800;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        /* ── RIGHT: CP vs AP cards ── */
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .choice-card {
+            border-radius: 16px;
+            padding: 22px;
+            border: 2px solid;
+        }
+
+        .choice-card.cp {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .choice-card.ap {
+            border-color: #059669;
+            background: #f0fdf4;
+        }
+
+        .cc-title {
+            font-size: 15px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cc-title.cp {
+            color: #1d4ed8;
+        }
+
+        .cc-title.ap {
+            color: #047857;
+        }
+
+        .cc-sub {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 14px;
+        }
+
+        .cc-row {
+            font-size: 11px;
+            color: #374151;
+            margin-bottom: 6px;
+            display: flex;
+            gap: 8px;
+            line-height: 1.4;
+        }
+
+        .cc-row .ico {
+            flex-shrink: 0;
+        }
+
+        .cc-examples {
+            margin-top: 14px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .ex {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid;
+        }
+
+        .ex.cp {
+            border-color: #93c5fd;
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .ex.ap {
+            border-color: #6ee7b7;
+            color: #047857;
+            background: #d1fae5;
+        }
+
+        /* ── PACELC FOOTER STRIP ── */
+        .pacelc-strip {
+            margin: 0 50px;
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 22px 36px;
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .ps-label {
+            font-size: 14px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 1px;
+            margin-right: 32px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .ps-items {
+            display: flex;
+            gap: 0;
+            flex: 1;
+        }
+
+        .ps-item {
+            flex: 1;
+            text-align: center;
+            padding: 0 12px;
+            border-right: 1px solid #1e293b;
+        }
+
+        .ps-item:last-child {
+            border-right: none;
+        }
+
+        .ps-db {
+            font-size: 12px;
+            font-weight: 800;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .ps-cls {
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .ps-use {
+            font-size: 9px;
+            color: #475569;
+            margin-top: 2px;
+        }
+
+        /* ── FOOTER LINE ── */
+        .foot {
+            padding: 16px 60px 24px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP -->
+    <div class="top-bar">
+        <div>
+            <div class="title">CAP Theorem</div>
+            <div class="sub">A distributed system can only guarantee 2 of these 3 properties simultaneously</div>
+        </div>
+        <div style="font-size:11px; color:#94a3b8; text-align:right; line-height:1.8;">
+            Scaler Academy · HLD Module<br>
+            Instructor: Tarun Malhotra (Google)
+        </div>
+    </div>
+
+    <!-- MAIN 3-COL -->
+    <div class="main">
+
+        <!-- LEFT: Definitions -->
+        <div class="defs">
+            <div class="def">
+                <div class="def-dot c">C</div>
+                <div class="def-text">
+                    <div class="def-name c">Consistency</div>
+                    <div class="def-desc">Every read returns the most recent write. No stale data — ever.</div>
+                </div>
+            </div>
+            <div class="def">
+                <div class="def-dot a">A</div>
+                <div class="def-text">
+                    <div class="def-name a">Availability</div>
+                    <div class="def-desc">System always responds to every request — even if data might be slightly old.
+                    </div>
+                </div>
+            </div>
+            <div class="def">
+                <div class="def-dot p">P</div>
+                <div class="def-text">
+                    <div class="def-name p">Partition Tolerance</div>
+                    <div class="def-desc">System keeps working even when nodes can't communicate.</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 10px; padding: 16px 18px; border-radius: 12px;
+                background: #fff7ed; border: 1px solid #fed7aa; font-size: 11px;
+                color: #92400e; line-height: 1.7; font-weight: 500;">
+                ⚠️ <strong>Network partitions always happen</strong> in the real world.<br>
+                So <strong>P is mandatory</strong> — the real choice is:<br>
+                <strong style="color:#1d4ed8;">CP</strong> (accuracy first) &nbsp;or&nbsp; <strong
+                    style="color:#047857;">AP</strong> (uptime first)
+            </div>
+        </div>
+
+        <!-- CENTRE: Triangle -->
+        <div class="tri-wrap">
+            <svg width="480" height="430" viewBox="0 0 480 430">
+                <!-- Zone fills -->
+                <polygon points="240,55 432,375 338,375" fill="#2563eb" opacity="0.07" />
+                <polygon points="240,55 142,375 338,375" fill="#059669" opacity="0.06" />
+                <polygon points="240,55 48,375  142,375" fill="#7c3aed" opacity="0.05" />
+                <!-- Triangle border -->
+                <path d="M240,55 L432,375 H48 Z" stroke="#e2e8f0" stroke-width="2.5" fill="none"
+                    stroke-linejoin="round" />
+                <!-- Dashed dividers -->
+                <line x1="240" y1="55" x2="338" y2="375" stroke="#e2e8f0" stroke-dasharray="6,5" stroke-width="1.5" />
+                <line x1="240" y1="55" x2="142" y2="375" stroke="#e2e8f0" stroke-dasharray="6,5" stroke-width="1.5" />
+            </svg>
+
+            <!-- Vertices -->
+            <div class="vnode vn-c"><span class="letter">C</span><span class="name">Consistency</span></div>
+            <div class="vnode vn-a"><span class="letter">A</span><span class="name">Availability</span></div>
+            <div class="vnode vn-p"><span class="letter">P</span><span class="name">Partition</span></div>
+
+            <!-- Zone labels -->
+            <div class="zone-lbl zl-cp">CP</div>
+            <div class="zone-lbl zl-ap">AP</div>
+            <div class="zone-lbl zl-ca">CA</div>
+
+            <!-- Centre ring -->
+            <div class="ctr-ring">Pick<br>only<br>2 of 3</div>
+        </div>
+
+        <!-- RIGHT: CP vs AP -->
+        <div class="choices">
+            <div class="choice-card cp">
+                <div class="cc-title cp">🔵 CP System</div>
+                <div class="cc-sub">Consistency + Partition Tolerance</div>
+                <div class="cc-row"><span class="ico">✅</span><span>Always returns <b>correct</b>, up-to-date
+                        data</span></div>
+                <div class="cc-row"><span class="ico">❌</span><span>May become <b>unavailable</b> if a node fails</span>
+                </div>
+                <div class="cc-row"><span class="ico">⏱</span><span>Higher latency — waits for all nodes to sync</span>
+                </div>
+                <div class="cc-examples">
+                    <span class="ex cp">🏦 Bank ATM</span>
+                    <span class="ex cp">🎫 IRCTC</span>
+                    <span class="ex cp">📈 Zerodha</span>
+                    <span class="ex cp">♟️ Chess</span>
+                </div>
+            </div>
+
+            <div class="choice-card ap">
+                <div class="cc-title ap">🟢 AP System</div>
+                <div class="cc-sub">Availability + Partition Tolerance</div>
+                <div class="cc-row"><span class="ico">✅</span><span>Always responds — <b>never returns an
+                            error</b></span></div>
+                <div class="cc-row"><span class="ico">❌</span><span>Data might be <b>slightly stale</b> during
+                        outages</span></div>
+                <div class="cc-row"><span class="ico">⚡</span><span>Low latency — responds immediately</span></div>
+                <div class="cc-examples">
+                    <span class="ex ap">▶️ YouTube Views</span>
+                    <span class="ex ap">📺 Hotstar</span>
+                    <span class="ex ap">🌐 DNS</span>
+                    <span class="ex ap">❤️ Social Likes</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PACELC STRIP -->
+    <div class="pacelc-strip">
+        <div class="ps-label">PACELC<br><span
+                style="font-size:10px; color:#475569; font-weight:400; letter-spacing:0;">Normal ops: Latency vs
+                Consistency</span></div>
+        <div class="ps-items">
+            <div class="ps-item">
+                <div class="ps-db">Cassandra</div>
+                <div class="ps-cls"><span style="color:#34d399;">PA</span> / <span style="color:#c084fc;">EL</span>
+                </div>
+                <div class="ps-use">Social Feeds</div>
+            </div>
+            <div class="ps-item">
+                <div class="ps-db">DynamoDB</div>
+                <div class="ps-cls"><span style="color:#34d399;">PA</span> / <span style="color:#c084fc;">EL</span>
+                </div>
+                <div class="ps-use">Shopping Cart</div>
+            </div>
+            <div class="ps-item">
+                <div class="ps-db">MongoDB</div>
+                <div class="ps-cls"><span style="color:#60a5fa;">PC</span> / <span style="color:#fbbf24;">EC</span>
+                </div>
+                <div class="ps-use">Documents</div>
+            </div>
+            <div class="ps-item">
+                <div class="ps-db">Zookeeper</div>
+                <div class="ps-cls"><span style="color:#60a5fa;">PC</span> / <span style="color:#fbbf24;">EC</span>
+                </div>
+                <div class="ps-use">Coordination</div>
+            </div>
+            <div class="ps-item">
+                <div class="ps-db">HBase</div>
+                <div class="ps-cls"><span style="color:#60a5fa;">PC</span> / <span style="color:#fbbf24;">EC</span>
+                </div>
+                <div class="ps-use">Analytics</div>
+            </div>
+            <div class="ps-item">
+                <div class="ps-db">MySQL (single)</div>
+                <div class="ps-cls"><span style="color:#94a3b8;">CA</span> / <span style="color:#fbbf24;">EC</span>
+                </div>
+                <div class="ps-use">Traditional Apps</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="foot">
+        <span>CAP Theorem: Eric Brewer (2000) · PACELC: Daniel J. Abadi (2012)</span>
+        <span>C = Consistency · A = Availability · P = Partition Tolerance · E = Else · L = Latency</span>
+    </div>
+
+</body>
+
+</html>
