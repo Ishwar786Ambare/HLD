@@ -955,3 +955,14 @@ graph TD
 ```
 
 **Why keep backups?** If you selfishly create new shards using *all* 15 servers, the next time a server's hard drive breaks, you will have **zero** replacements available, leading to immediate data loss. A good orchestrator probabilistically calculates a backup limit based on the frequency of hardware breakdown.
+
+
+## References & Further Reading
+
+Resource |	Description|
+Designing Data-Intensive Applications|	Martin Kleppmann's definitive book
+CAP Theorem Explained|	IBM's CAP theorem guide
+PostgreSQL Documentation|	Official PostgreSQL docs
+MongoDB University|	Free MongoDB courses
+Redis University|	Free Redis courses
+System Design Primer| Comprehensive system design guide
