@@ -197,38 +197,24 @@ db.users.find(
 
 Data is broken into separate related tables to minimize redundancy.
 
-```mermaid
-erDiagram
-    USERS ||--|{ ORDERS : places
-    PRODUCTS ||--|{ ORDERS : contains
-
-    USERS {
-        int id PK
-        string username
-        string email
-        datetime created_at
-    }
-    ORDERS {
-        int id PK
-        int user_id FK
-        int product_id FK
-        int quantity
-        float total_amount
-        string status
-        datetime ordered_at
-    }
-    PRODUCTS {
-        int id PK
-        string name
-        float price
-        string category
-    }
 ```
+┌──────────────┐     ┌──────────────────┐     ┌──────────────┐
+│   USERS      │     │     ORDERS       │     │   PRODUCTS   │
+├──────────────┤     ├──────────────────┤     ├──────────────┤
+│ id (PK)      │◄────│ user_id (FK)     │     │ id (PK)      │
+│ username     │     │ id (PK)          │     │ name         │
+│ email        │     │ product_id (FK)  │────►│ price        │
+│ created_at   │     │ quantity         │     │ category     │
+└──────────────┘     │ total_amount     │     └──────────────┘
+                     │ status           │
+                     │ ordered_at       │
+                     └──────────────────┘
 
-**Normalization Levels:**
-*   **1NF** → No repeating groups
-*   **2NF** → No partial dependencies
-*   **3NF** → No transitive dependencies
+Normalization Levels:
+  1NF → No repeating groups
+  2NF → No partial dependencies
+  3NF → No transitive dependencies
+```
 
 **Advantages of Normalization:**
 *   No data duplication
