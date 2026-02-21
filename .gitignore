@@ -8,6 +8,7 @@ package-lock.json
 __pycache__/
 *.pyc
 *.pyo
+.venv
 
 # Temp files
 frames/
@@ -21,3 +22,7 @@ frames/
 Thumbs.db
 .DS_Store
 desktop.ini
+
+# transcripts
+transcripts/
+transcripts_log.txt
