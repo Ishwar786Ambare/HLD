@@ -548,29 +548,80 @@ Performance
 
 The CAP Theorem states that a distributed database can guarantee only **two out of three** properties simultaneously.
 
-```mermaid
-graph TD
-    C(Consistency) --- A(Availability)
-    C --- P(Partition Tolerance)
-    A --- P
+```
+                          CAP THEOREM
+                      (Choose 2 of 3 Properties)
 
-    style C fill:#f9f,stroke:#333,stroke-width:2px
-    style A fill:#bbf,stroke:#333,stroke-width:2px
-    style P fill:#bfb,stroke:#333,stroke-width:2px
+                              ▲
+                             ╱│╲
+                            ╱ │ ╲
+                           ╱  │  ╲
+                          ╱   │   ╲
+                         ╱    │    ╲
+                        ╱  CP │ AP  ╲
+                       ╱      │      ╲
+                      ╱       │       ╲
+                     ╱========●========╲
+                    ╱    MongoDB     Cassandra
+                   ╱     HBase      DynamoDB
+                  ╱  Redis Cluster    CouchDB
+                 ╱                          ╲
+                ╱____________________________╲
+        Consistency                   Availability
+                      Partition Tolerance
+                      (Always Present!)
 
-    %% Labels for the edges
-    C ---|CA: RDBMS MySQL/PostgreSQL| A
-    C ---|CP: MongoDB, Redis Cluster| P
-    A ---|AP: Cassandra, DynamoDB| P
+⚠️  In distributed systems, network partitions WILL happen.
+    You must choose between:
+    
+    CP: Sacrifice Availability → Reject writes during partition
+    AP: Sacrifice Consistency → Serve stale data during partition
+    
+    CA: Single-node systems only (NOT viable in practice)
 ```
 
-| Type | Examples | Description |
-| :--- | :--- | :--- |
-| **CP** | MongoDB, HBase, Redis (cluster) | Consistent + Partition Tolerant. May reject writes during partitions. |
-| **AP** | Cassandra, DynamoDB, CouchDB | Available + Partition Tolerant. May serve stale data during partitions. |
-| **CA** | Traditional RDBMS | Consistent + Available. Not partition tolerant (single node). In practice, CA doesn't exist in distributed systems. |
+**CAP Choices Explained:**
 
-> **⚠️ Important:** In a distributed system, network partitions *will* happen. So the real choice is between CP and AP.
+```
+┌──────────────────────────────────────────────────────────────┐
+│  CP: Consistency + Partition Tolerance                       │
+├──────────────────────────────────────────────────────────────┤
+│  Examples: MongoDB, HBase, Redis (cluster)                  │
+│                                                              │
+│  Strategy: When network partition occurs, BLOCK writes      │
+│  until partition heals. Ensures consistency.                │
+│                                                              │
+│  Tradeoff: Lower availability during network issues         │
+│  Use Case: Financial systems, banking (↑ consistency)       │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  AP: Availability + Partition Tolerance                      │
+├──────────────────────────────────────────────────────────────┤
+│  Examples: Cassandra, DynamoDB, CouchDB                     │
+│                                                              │
+│  Strategy: When network partition occurs, ALLOW writes      │
+│  on both sides. Data converges when partition heals.        │
+│                                                              │
+│  Tradeoff: Temporary inconsistency (eventual consistency)   │
+│  Use Case: Social media, analytics (↑ availability)         │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  CA: Consistency + Availability (THEORETICAL)               │
+├──────────────────────────────────────────────────────────────┤
+│  Examples: Traditional RDBMS (single node), SQLite          │
+│                                                              │
+│  Reality: These are NOT partition tolerant because they     │
+│  either crash or cannot replicate across networks.          │
+│                                                              │
+│  In modern cloud systems, CA doesn't exist in practice!     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**⚠️ Important Insight:**
+
+> In a distributed system, network partitions *will* happen. You cannot avoid the P in CAP. Therefore, the real-world choice is **CP vs AP**, not CA.
 
 ---
 
