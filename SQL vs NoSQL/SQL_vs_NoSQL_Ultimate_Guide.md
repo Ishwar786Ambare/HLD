@@ -232,31 +232,37 @@ Normalization Levels:
 Data is stored together as it's accessed, optimizing for read performance.
 
 **User Document (Embedded Data):**
-```json
-{
-  "_id": "user_123",
-  "username": "john_doe",
-  "email": "john@example.com",
-  "profile": {
-    "name": "John Doe",
-    "avatar": "https://..."
-  },
-  "orders": [
-    {
-      "product": {
-        "name": "Laptop",
-        "price": 999.99
-      },
-      "quantity": 1,
-      "status": "completed"
-    }
-  ]
-}
 ```
-*   → Single read fetches everything needed
-*   → No JOINs required
-*   → Data may be duplicated across documents
+┌─────────────────────────────────────────────────────┐
+│                  USER DOCUMENT                       │
+├─────────────────────────────────────────────────────┤
+│ {                                                    │
+│   "_id": "user_123",                                │
+│   "username": "john_doe",                           │
+│   "email": "john@example.com",                      │
+│   "profile": {                                      │
+│     "name": "John Doe",                             │
+│     "avatar": "https://..."                         │
+│   },                                                │
+│   "orders": [                    ◄── Embedded       │
+│     {                                               │
+│       "product": {               ◄── Denormalized   │
+│         "name": "Laptop",                           │
+│         "price": 999.99                             │
+│       },                                            │
+│       "quantity": 1,                                │
+│       "status": "completed"                         │
+│     }                                               │
+│   ]                                                 │
+│ }                                                   │
+└─────────────────────────────────────────────────────┘
 
+
+  → Single read fetches everything needed
+  → No JOINs required
+  → Data may be duplicated across documents
+
+```
 **Advantages of Denormalization:**
 *   Faster reads (single query)
 *   Simpler queries
@@ -407,13 +413,27 @@ graph TD
 
 **Scaling Comparison Summary:**
 
-| Factor | Vertical Scaling (SQL) | Horizontal Scaling (NoSQL) |
-|---|---|---|
-| **Complexity** | Simple (no code changes) | Complex architecture |
-| **Limits** | Hardware limits (ceiling hit eventually) | Near-linear (virtually unlimited) |
-| **Cost** | Grows exponentially | Grows linearly (Commodity hardware) |
-| **Failures** | Single Point of Failure | No Single Point of Failure |
-| **Drawbacks** | Downtime during upgrades | Cross-shard queries are expensive |
+```
+Performance
+    ▲
+    │         NoSQL (horizontal)
+    │        ╱
+    │       ╱
+    │      ╱         SQL (vertical)
+    │     ╱         ╱
+    │    ╱         ╱
+    │   ╱         ╱  ← Hardware ceiling
+    │  ╱         ╱ . . . . . . . . .
+    │ ╱         ╱
+    │╱         ╱
+    └──────────────────────────────────► Scale
+           Cost & Complexity
+```
+
+**Key Insights:**
+- **SQL (Vertical):** Performance hits a hardware ceiling. You can't scale beyond the biggest server available.
+- **NoSQL (Horizontal):** Performance scales linearly by adding more commodity servers. No hard ceiling.
+- **Cost:** SQL breaks exponential cost curve. NoSQL maintains linear cost scaling.
 
 ---
 
@@ -421,25 +441,106 @@ graph TD
 
 ### ACID (SQL Databases)
 
-| Property | Description | Example |
-| :--- | :--- | :--- |
-| **Atomicity** | All operations succeed, or ALL roll back. "All or Nothing." | `BEGIN TRANSACTION; UPDATE A; UPDATE B; COMMIT;` (Both happen or neither does) |
-| **Consistency** | Data moves from one valid state to another. Constraints hold. | Total money before transfer = Total money after |
-| **Isolation** | Concurrent transactions don't interfere. Seeing a consistent snapshot. | Isolation Levels: Read Uncommitted, Read Committed, Repeatable Read, Serializable |
-| **Durability** | Once committed, data survives crashes (Written to disk/WAL). | Power failure after COMMIT? Data is safe. ✓ |
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        ACID Properties                       │
+├──────────────┬──────────────────────────────────────────────┤
+│              │                                               │
+│  Atomicity   │  All operations succeed, or ALL roll back.   │
+│              │  "All or Nothing"                             │
+│              │                                               │
+│              │  BEGIN TRANSACTION;                           │
+│              │    UPDATE accounts SET bal = bal - 100        │
+│              │      WHERE id = 'Alice';                     │
+│              │    UPDATE accounts SET bal = bal + 100        │
+│              │      WHERE id = 'Bob';                       │
+│              │  COMMIT;   ← Both happen, or neither does    │
+│              │                                               │
+├──────────────┼──────────────────────────────────────────────┤
+│              │                                               │
+│  Consistency │  Data moves from one valid state to another. │
+│              │  All constraints, triggers, cascades hold.   │
+│              │                                               │
+│              │  Total money before = Total money after      │
+│              │  Foreign keys always point to valid records   │
+│              │                                               │
+├──────────────┼──────────────────────────────────────────────┤
+│              │                                               │
+│  Isolation   │  Concurrent transactions don't interfere.    │
+│              │  Each transaction sees a consistent snapshot. │
+│              │                                               │
+│              │  Isolation Levels:                            │
+│              │    READ UNCOMMITTED (lowest)                  │
+│              │    READ COMMITTED                             │
+│              │    REPEATABLE READ                            │
+│              │    SERIALIZABLE (highest)                     │
+│              │                                               │
+├──────────────┼──────────────────────────────────────────────┤
+│              │                                               │
+│  Durability  │  Once committed, data survives crashes.      │
+│              │  Written to disk / WAL (Write-Ahead Log).    │
+│              │                                               │
+│              │  Power failure after COMMIT? Data is safe. ✓ │
+│              │                                               │
+└──────────────┴──────────────────────────────────────────────┘
+```
 
 ### BASE (NoSQL Databases)
 
-| Property | Description | Example |
-| :--- | :--- | :--- |
-| **Basically Available** | The system guarantees availability. Every request gets a response, even during partial system failures. | Reading data will return a result, even if it might be slightly stale. |
-| **Soft State** | The state of the system may change over time, even without new input, due to eventual consistency. | Node A has $100, Node B has $200 (converging). |
-| **Eventually Consistent** | Given enough time and no new updates, all replicas will converge to the same value. | t=0: Write to A. t=1: A=200, B=100. t=2: A=200, B=200. ✓ |
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        BASE Properties                       │
+├──────────────────┬──────────────────────────────────────────┤
+│                  │                                           │
+│  Basically       │  The system guarantees availability.     │
+│  Available       │  Every request gets a response           │
+│                  │  (success or failure), even during        │
+│                  │  partial system failures.                │
+│                  │                                           │
+├──────────────────┼──────────────────────────────────────────┤
+│                  │                                           │
+│  Soft State      │  The state of the system may change      │
+│                  │  over time, even without new input,      │
+│                  │  due to eventual consistency.            │
+│                  │                                           │
+│                  │  Node A: balance = $100  ←─┐             │
+│                  │  Node B: balance = $200    │ Converging  │
+│                  │  Node C: balance = $200  ──┘             │
+│                  │                                           │
+├──────────────────┼──────────────────────────────────────────┤
+│                  │                                           │
+│  Eventually      │  Given enough time and no new updates,  │
+│  Consistent      │  all replicas will converge to the      │
+│                  │  same value.                             │
+│                  │                                           │
+│                  │  t=0:  Write "balance=200" to Node A     │
+│                  │  t=1:  Node A = 200, B = 100, C = 100   │
+│                  │  t=2:  Node A = 200, B = 200, C = 100   │
+│                  │  t=3:  Node A = 200, B = 200, C = 200 ✓ │
+│                  │                                           │
+└──────────────────┴──────────────────────────────────────────┘
+```
 
 ### ACID vs BASE Comparison
 
-*   **ACID (Strong Consistency):** Banking, Inventory, Healthcare. (Higher Latency)
-*   **BASE (Eventual Consistency):** Social media, Analytics, Caching. (Higher Throughput)
+```
+                ACID                              BASE
+          ┌───────────┐                     ┌───────────┐
+          │ Strong    │                     │ Eventual  │
+          │Consistency│                     │Consistency│
+          │           │                     │           │
+          │ ✓ Banking │                     │ ✓ Social  │
+          │ ✓ Inventory│                    │   media   │
+          │ ✓ Healthcare│                   │ ✓ Analytics│
+          │           │                     │ ✓ Caching │
+          │ Higher    │                     │ Higher    │
+          │ Latency   │                     │ Throughput│
+          └───────────┘                     └───────────┘
+```
+
+**When to Choose:**
+*   **ACID:** Banking, Inventory, Healthcare systems (Higher Latency, guaranteed correctness)
+*   **BASE:** Social media, Analytics, Caching systems (Higher Throughput, eventual correctness)
 
 ---
 
