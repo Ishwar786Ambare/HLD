@@ -959,10 +959,11 @@ graph TD
 
 ## References & Further Reading
 
-Resource |	Description|
-Designing Data-Intensive Applications|	Martin Kleppmann's definitive book
-CAP Theorem Explained|	IBM's CAP theorem guide
-PostgreSQL Documentation|	Official PostgreSQL docs
-MongoDB University|	Free MongoDB courses
-Redis University|	Free Redis courses
-System Design Primer| Comprehensive system design guide
+| Resource | Description |
+|----------|-------------|
+| **Designing Data-Intensive Applications** | Martin Kleppmann's definitive book on distributed systems and database design |
+| **CAP Theorem Explained** | IBM's comprehensive guide to the CAP theorem and its practical implications |
+| **PostgreSQL Documentation** | Official PostgreSQL docs covering all features, configuration, and best practices |
+| **MongoDB University** | Free MongoDB courses and certifications for hands-on learning |
+| **Redis University** | Free Redis courses covering caching, data structures, and cluster management |
+| **System Design Primer** | Comprehensive open-source guide to system design interviews and architecture patterns |
