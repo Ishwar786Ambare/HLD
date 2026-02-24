@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+body { font-family: 'Inter', sans-serif; background: #fdfdfd; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; color: #0f172a; overflow: hidden; }
+* { box-sizing: border-box; }
+
+.container { width: 1400px; height: 800px; background: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; display: flex; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05); }
+
+.col-left { flex: 1.1; display:flex; flex-direction: column; justify-content: center; padding: 80px; border-right: 1px solid #e2e8f0; position:relative;}
+.col-right { flex: 0.9; display:flex; flex-direction: column; justify-content: center; padding: 80px; background: #f8fafc; border-radius: 0 24px 24px 0;}
+
+.title { font-size: 46px; font-weight: 800; color: #0f172a; margin-bottom: 20px; line-height: 1.2;}
+.title span { color: #2563eb; }
+.subtitle { font-size: 20px; color: #64748b; margin-bottom: 60px; line-height:1.5;}
+
+.search-container { position:relative; width: 100%; z-index: 10; }
+.search-box { width: 100%; height: 75px; border-radius: 37.5px; border: 2.5px solid #e2e8f0; display: flex; align-items: center; padding: 0 35px 0 75px; background: #fff; position:relative; z-index: 12; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+.search-icon { position:absolute; left: 30px; stroke: #94a3b8; stroke-width: 2.5; fill: none; width: 28px; height: 28px; stroke-linecap:round; stroke-linejoin:round; }
+.search-text { font-size: 26px; color: #0f172a; display:flex; align-items:center; }
+.cursor { width: 3px; height: 32px; background: #2563eb; margin-left: 2px; animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity:0; } }
+
+.suggestions { position:absolute; top: 37.5px; left:0; width:100%; background:#fff; border: 2.5px solid #cbd5e1; border-top:none; border-radius: 0 0 24px 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow:hidden; z-index: 11; opacity:0; height:0;}
+.sugg-item { padding: 18px 30px 18px 75px; font-size: 22px; color: #334155; position:relative; border-bottom: 1px solid #f1f5f9; display:flex; align-items:center;}
+.sugg-item:last-child { border-bottom: none; }
+.sugg-icon { position:absolute; left: 32px; stroke: #94a3b8; stroke-width: 2.5; fill: none; width: 22px; height: 22px; }
+.bold { font-weight: 700; color: #0f172a;}
+
+.badge { position:absolute; right: 20px; background: #f1f5f9; color: #475569; font-size: 13px; font-weight:600; padding: 4px 8px; border-radius: 6px; }
+
+.sys-title { font-size: 22px; font-weight: 700; color: #1e293b; margin-bottom: 25px; display:flex;justify-content:space-between; align-items:center;}
+.tag { font-size: 14px; font-weight: 700; background: #dbeafe; color: #1d4ed8; padding: 6px 14px; border-radius: 20px; text-transform:uppercase; letter-spacing:1px; }
+
+.kv-store { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 25px; position:relative;}
+.kv-row { display:flex; margin-bottom: 12px; font-size: 18px;}
+.kv-row:last-child { margin-bottom: 0; }
+.kv-k { font-weight: 700; font-family: monospace; color: #0f172a; width: 70px; padding-top:4px;}
+.kv-v { flex:1; display:flex; flex-direction:column; gap: 8px; }
+.pill { background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 15px; color: #475569;}
+
+.highlight { position:absolute; top:-2px;left:-2px;right:-2px;bottom:-2px; border: 3px solid #3b82f6; border-radius: 18px; opacity:0; transition: opacity 0.2s; pointer-events:none;}
+.hit-tag { position:absolute; right: -20px; top: 30%; background: #22c55e; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 700; opacity:0; box-shadow: 0 4px 6px rgba(34,197,94,0.3); transform: translateX(-10px); }
+
+/* ANIMATION LOGIC (Looping every 5 seconds) */
+/* 0s to 1s: delay */
+/* 1s to 2.5s: Type 'd', 'di', 'diw' */
+/* 2.5s to 4s: Pause and show suggestions */
+/* 4s to 5s: Hide */
+
+@keyframes textAnim {
+  0%, 15% { content: ""; }
+  20%, 30% { content: "d"; }
+  35%, 45% { content: "di"; }
+  50%, 85% { content: "diw"; }
+  95%, 100% { content: ""; }
+}
+.search-text::before { content: ""; animation: textAnim 5s linear infinite; }
+
+@keyframes searchBoxAnim {
+  0%, 48% { border-radius: 37.5px; border-color: #e2e8f0; }
+  50%, 85% { border-radius: 24px 24px 0 0; border-color: #cbd5e1; border-bottom-color: transparent;}
+  90%, 100% { border-radius: 37.5px; border-color: #e2e8f0; }
+}
+.search-box { animation: searchBoxAnim 5s linear infinite; }
+
+@keyframes suggAnim {
+  0%, 48% { height: 0; opacity: 0; padding-top:0;}
+  50%, 85% { height: 330px; opacity: 1; padding-top:40px;} /* 37.5px top + space */
+  90%, 100% { height: 0; opacity: 0; padding-top:0;}
+}
+.suggestions { animation: suggAnim 5s linear infinite; }
+
+@keyframes highlightAnim {
+  0%, 50% { opacity: 0; }
+  52%, 85% { opacity: 1; }
+  90%, 100% { opacity: 0; }
+}
+.highlight { animation: highlightAnim 5s linear infinite; }
+
+@keyframes hitTagAnim {
+  0%, 52% { opacity: 0; transform: translateX(-10px); }
+  55%, 85% { opacity: 1; transform: translateX(0); }
+  90%, 100% { opacity: 0; transform: translateX(-10px); }
+}
+.hit-tag { animation: hitTagAnim 5s linear infinite; }
+
+@keyframes cachePathAnim {
+    0%, 52% { stroke-dashoffset: 100; opacity:0;}
+    54%, 85% { stroke-dashoffset: 0; opacity:1;}
+    90%, 100% { stroke-dashoffset: 100; opacity:0;}
+}
+.path-line { stroke-dasharray: 100; stroke-dashoffset: 100; animation: cachePathAnim 5s infinite linear;}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="col-left">
+        <div class="title">Typeahead <span>Design</span></div>
+        <div class="subtitle">Real-time prefix search at scale (< 10ms response)</div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <div class="search-text"><div class="cursor"></div></div>
+            </div>
+            <div class="suggestions">
+                <div class="sugg-item">
+                    <svg class="sugg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span class="bold">diw</span>ali<div class="badge">1.4B hits</div>
+                </div>
+                <div class="sugg-item">
+                    <svg class="sugg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span class="bold">diw</span>ali 2024<div class="badge">Trending</div>
+                </div>
+                <div class="sugg-item">
+                    <svg class="sugg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span class="bold">diw</span>ali rangoli<div class="badge">Image</div>
+                </div>
+                <div class="sugg-item">
+                    <svg class="sugg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span class="bold">diw</span>ali wishes
+                </div>
+                <div class="sugg-item">
+                    <svg class="sugg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span class="bold">diw</span>ali crackers
+                </div>
+            </div>
+        </div>
+
+        <svg style="position:absolute; right: -2px; top: 400px; width: 80px; height: 40px; z-index: 100;">
+            <path class="path-line" d="M0,20 L75,20 L65,10 M75,20 L65,30" stroke="#3b82f6" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+
+    </div>
+    
+    <div class="col-right">
+        <div class="sys-title">Prefix Store (O(1) Lookup) <span class="tag">Redis Cache</span></div>
+        
+        <div class="kv-store">
+            <div class="kv-row">
+                <div class="kv-k">"d"</div>
+                <div class="kv-v">
+                    <div class="pill">["download", "docs", "diwali", "discord"]</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="kv-store" style="z-index: 10;">
+            <div class="highlight"></div>
+            <div class="hit-tag">CACHE HIT &lt;1ms</div>
+            <div class="kv-row">
+                <div class="kv-k" style="color: #2563eb;">"diw"</div>
+                <div class="kv-v">
+                    <div class="pill" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af; font-weight:600;">"diwali"</div>
+                    <div class="pill" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af; font-weight:600;">"diwali 2024"</div>
+                    <div class="pill" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af; font-weight:600;">"diwali rangoli"</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="kv-store">
+            <div class="kv-row">
+                <div class="kv-k">"diwa"</div>
+                <div class="kv-v">
+                    <div class="pill">["diwali", "diwali 2024", "diwali rangoli"]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

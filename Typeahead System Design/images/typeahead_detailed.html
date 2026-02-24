@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 1080px;
+            width: 1920px;
+            color: #f8fafc;
+            overflow: hidden;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 1800px;
+            height: 1050px;
+            background: #1e293b;
+            border-radius: 32px;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 50px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 50px;
+            font-weight: 800;
+            color: #f8fafc;
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .title span {
+            color: #38bdf8;
+        }
+
+        .subtitle {
+            font-size: 22px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .meta-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 15px 25px;
+            border-radius: 16px;
+            display: flex;
+            gap: 30px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-lbl {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .meta-val {
+            font-size: 20px;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .content {
+            position: relative;
+            width: 100%;
+            height: 890px;
+        }
+
+        /* Diagram Nodes */
+        .node {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 20px;
+            padding: 25px;
+            position: absolute;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .node-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .node-type {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            font-size: 13px;
+            font-weight: 700;
+            color: #94a3b8;
+            padding: 4px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .code-box {
+            background: #0b1120;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #a5b4fc;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+        .cb-k {
+            color: #f472b6;
+        }
+
+        .cb-str {
+            color: #34d399;
+        }
+
+        .cb-num {
+            color: #fbbf24;
+        }
+
+        .cb-comment {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .highlight-node {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2) inset;
+        }
+
+        .bg-gradient-blue {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        }
+
+        .bg-gradient-green {
+            background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%);
+            border-color: #10b981;
+        }
+
+        .active-badge {
+            color: #10b981;
+            font-weight: 800;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        /* Small tables */
+        .data-table {
+            width: 100%;
+            text-align: left;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .data-table th {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #334155;
+            text-transform: uppercase;
+        }
+
+        .data-table td {
+            font-size: 14px;
+            color: #cbd5e1;
+            padding: 10px 0;
+            border-bottom: 1px solid #1e293b;
+            font-family: monospace;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* SVG Connectors */
+        .path-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .path-line {
+            fill: none;
+            stroke-width: 3;
+            stroke-dasharray: 8 6;
+        }
+
+        .path-read {
+            stroke: #38bdf8;
+        }
+
+        .path-write {
+            stroke: #10b981;
+        }
+
+        .path-async {
+            stroke: #f59e0b;
+        }
+
+        /* Connect Dots */
+        .dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            z-index: 15;
+            transform: translate(-50%, -50%);
+        }
+
+        .dot-read {
+            background: #38bdf8;
+        }
+
+        .dot-write {
+            background: #10b981;
+        }
+
+        .dot-async {
+            background: #f59e0b;
+        }
+
+        /* Link Labels */
+        .lbl {
+            position: absolute;
+            font-size: 14px;
+            font-weight: 700;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 4px 12px;
+            z-index: 20;
+            white-space: nowrap;
+            transform: translate(-50%, -50%);
+        }
+
+        .lbl-read {
+            color: #38bdf8;
+        }
+
+        .lbl-write {
+            color: #10b981;
+        }
+
+        .lbl-async {
+            color: #f59e0b;
+        }
+
+        /* Animations */
+        .anim-dash-read {
+            animation: march 1s linear infinite;
+        }
+
+        .anim-dash-write {
+            animation: march 1s linear infinite;
+        }
+
+        .anim-dash-async {
+            animation: march 1s linear infinite;
+        }
+
+        @keyframes march {
+            to {
+                stroke-dashoffset: -14;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <div class="title">Typeahead <span>System Architecture</span></div>
+                <div class="subtitle">Decoupled Read & Write Paths (Eventual Consistency &lt; 10ms)</div>
+            </div>
+            <div class="meta-box">
+                <div class="meta-item"><span class="meta-lbl">Traffic</span><span class="meta-val">1M+ QPS</span></div>
+                <div class="meta-item"><span class="meta-lbl">Latency</span><span class="meta-val">&lt; 10 ms</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Connecting SVG Paths -->
+            <svg class="path-layer">
+                <defs>
+                    <marker id="arrowRead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6"
+                        orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
+                    </marker>
+                    <marker id="arrowWrite" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6"
+                        orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
+                    </marker>
+                    <marker id="arrowAsync" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6"
+                        orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" />
+                    </marker>
+                </defs>
+
+                <!-- Read Path -->
+                <path class="path-line path-read anim-dash-read" d="M 320 120 L 460 120" marker-end="url(#arrowRead)" />
+                <path class="path-line path-read anim-dash-read" d="M 830 120 L 920 120" marker-end="url(#arrowRead)" />
+
+                <!-- Write Path -->
+                <path class="path-line path-write anim-dash-write" d="M 320 540 L 460 540"
+                    marker-end="url(#arrowWrite)" />
+                <path class="path-line path-write anim-dash-write" d="M 830 540 L 920 540"
+                    marker-end="url(#arrowWrite)" />
+
+                <!-- Async Path -->
+                <path class="path-line path-async anim-dash-async" d="M 1240 540 L 1330 540"
+                    marker-end="url(#arrowAsync)" />
+
+                <!-- Async Path Vertical -->
+                <!-- Async to Prefix -->
+                <path class="path-line path-async anim-dash-async" d="M 1495 435 L 1495 240"
+                    marker-end="url(#arrowAsync)" />
+                <!-- Async to Hit Count -->
+                <path class="path-line path-async anim-dash-async" d="M 1495 645 L 1495 710"
+                    marker-end="url(#arrowAsync)" />
+            </svg>
+
+            <!-- Link Source Dots -->
+            <div class="dot dot-read" style="left:320px; top:120px;"></div>
+            <div class="dot dot-read" style="left:830px; top:120px;"></div>
+            <div class="dot dot-write" style="left:320px; top:540px;"></div>
+            <div class="dot dot-write" style="left:830px; top:540px;"></div>
+            <div class="dot dot-async" style="left:1240px; top:540px;"></div>
+            <!-- Center bottom/top of Async box -->
+            <div class="dot dot-async" style="left:1495px; top:435px;"></div>
+            <div class="dot dot-async" style="left:1495px; top:645px;"></div>
+
+            <!-- Connection Labels (moved off lines to allow arrow visibility) -->
+            <div class="lbl lbl-read" style="left: 390px; top: 95px;">GET /typeahead</div>
+            <div class="lbl lbl-read" style="left: 875px; top: 95px;">O(1) Lookup</div>
+            <div class="lbl lbl-write" style="left: 390px; top: 515px;">POST /search</div>
+            <div class="lbl lbl-write" style="left: 875px; top: 515px;">Fire & Forget</div>
+            <div class="lbl lbl-async" style="left: 1285px; top: 515px;">Consume</div>
+            <div class="lbl lbl-async" style="left: 1565px; top: 340px;">Update Ranking</div>
+            <div class="lbl lbl-async" style="left: 1565px; top: 680px;">Inc() Count</div>
+
+
+            <!-- ================= COL 1 ================= -->
+            <div class="node" style="left:0px; top:35px; width:320px;">
+                <div class="node-title">Clients</div>
+                <div class="node-type">Mobile/Web</div>
+                <div class="code-box">
+                    <span class="cb-comment">// Optimizations</span><br>
+                    - Min 3 chars<br>
+                    - Debouncing (200ms)<br>
+                    - Local caching
+                </div>
+            </div>
+
+            <div class="node" style="left:0px; top:440px; width:320px;">
+                <div class="node-title" style="margin-bottom:0px;">API Gateway</div>
+                <div class="node-type" style="top:25px;">Load Balancer</div>
+                <div class="code-box" style="margin-top:20px;">
+                    - Rate Limiting<br>
+                    - SSL Termination<br>
+                    - Auth & Routing
+                </div>
+            </div>
+
+            <!-- ================= COL 2 ================= -->
+            <!-- Center Y = 120 -->
+            <div class="node highlight-node bg-gradient-blue" style="left:460px; top:10px; width:370px;">
+                <div class="node-title">Typeahead Read API</div>
+                <div class="node-type">Stateless</div>
+                <div class="code-box">
+                    <span class="cb-comment">// Extremely Fast &lt; 5ms</span><br>
+                    <span class="cb-k">func</span> handleRequest(req):<br>
+                    &nbsp;&nbsp;res = redis.get(req.prefix)<br>
+                    &nbsp;&nbsp;<span class="cb-k">if</span> res: <span class="cb-k">return</span> res<br>
+                    &nbsp;&nbsp;<span class="cb-k">return</span> db.get()
+                </div>
+            </div>
+
+            <!-- Center Y = 540 -->
+            <div class="node highlight-node bg-gradient-green" style="left:460px; top:440px; width:370px;">
+                <div class="node-title">Search Action API</div>
+                <div class="node-type">Stateless</div>
+                <div class="code-box">
+                    <span class="cb-k">func</span> handleSearch(query):<br>
+                    &nbsp;&nbsp;kafka.publish(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="cb-str">"search-events"</span>, query<br>
+                    &nbsp;&nbsp;)<br>
+                    &nbsp;&nbsp;<span class="cb-k">return</span> <span class="cb-num">202</span> Accepted
+                </div>
+            </div>
+
+            <!-- ================= COL 3 ================= -->
+            <div class="node" style="left:920px; top:20px; width:320px;">
+                <div class="node-title">Redis Cache Layer</div>
+                <div class="node-type" style="right:15px">In-Memory</div>
+                <table class="data-table">
+                    <tr>
+                        <th>Key</th>
+                        <th>TTL</th>
+                        <th>Value (Top 5 list)</th>
+                    </tr>
+                    <tr>
+                        <td>"diw"</td>
+                        <td>5m</td>
+                        <td>["diwali","diwali24"...]</td>
+                    </tr>
+                    <tr>
+                        <td>"ipl"</td>
+                        <td>5m</td>
+                        <td>["ipl schedule"...]</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="node" style="left:920px; top:440px; width:320px;">
+                <div class="node-title">Message Queue</div>
+                <div class="node-type">Kafka</div>
+                <div class="code-box">
+                    Topics: <span class="cb-str">search-events</span><br>
+                    Retention: 7 days<br>
+                    Partitions: 100+
+                </div>
+            </div>
+
+            <!-- ================= COL 4 ================= -->
+            <div class="node" style="left:1330px; top:20px; width:330px;">
+                <div class="node-title">Prefix Store</div>
+                <div class="node-type">KV Sharded</div>
+                <table class="data-table">
+                    <tr>
+                        <th>Prefix</th>
+                        <th>Top 5 Suggestions</th>
+                    </tr>
+                    <tr>
+                        <td>"d"</td>
+                        <td>["download", "docs"...]</td>
+                    </tr>
+                    <tr>
+                        <td>"di"</td>
+                        <td>["discord", "diwali"...]</td>
+                    </tr>
+                    <tr>
+                        <td class="active-badge">"diw"</td>
+                        <td class="active-badge">["diwali 2024"...]</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Center Y = 540 -->
+            <div class="node highlight-node bg-gradient-green"
+                style="left:1330px; top:440px; width:330px; border-color:#10b981; box-shadow:0 0 0 4px rgba(16,185,129,0.2) inset;">
+                <div class="node-title" style="color:#10b981;">Async Consumer</div>
+                <div class="node-type">Batch Work</div>
+                <div class="code-box">
+                    <span class="cb-comment">// Optimizations</span><br>
+                    1. Update hit count<br>
+                    2. Sample (1 in 1k)<br>
+                    3. Recalculate prefix
+                </div>
+            </div>
+
+            <div class="node" style="left:1330px; top:710px; width:330px;">
+                <div class="node-title">Hit Count Store</div>
+                <div class="node-type">KV Store</div>
+                <table class="data-table">
+                    <tr>
+                        <th>Query</th>
+                        <th>Frequency</th>
+                    </tr>
+                    <tr>
+                        <td>"diwali"</td>
+                        <td><span class="cb-num">14,245,600</span></td>
+                    </tr>
+                    <tr>
+                        <td>"diwali 2024"</td>
+                        <td><span class="cb-num">2,100,000</span></td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
