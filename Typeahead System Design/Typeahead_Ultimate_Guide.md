@@ -7,6 +7,10 @@
 
 ---
 
+![Typeahead System Design — Animated Overview](images/typeahead_linkedin_animated.gif)
+
+---
+
 ## 📋 Table of Contents
 
 ### Part 1: Introduction & Context
@@ -187,11 +191,11 @@ Before jumping into the design, it is critical to understand **how HLD interview
 
 ---
 
-### 🎬 Visual Overview — Typeahead System Design Complete Reference
+### 🎬 Visual Overview — Before vs After Typeahead
 
-![Typeahead System Design — Complete Visual Reference](images/typeahead_diagram.png)
+![Typeahead Before vs After — Simple Diagram](images/typeahead_diagram.png)
 
-> *The diagram above shows the complete typeahead system design reference — covering MVP requirements, scale estimation, system architecture (read & write paths), the two-hashmap data model, write optimizations (sampling, batching, time decay), and the full interview framework — all on a single poster.*
+> *Without typeahead, users type out the full query and wait. With typeahead, suggestions appear after just 3 characters — the system predicts the query and the user clicks instead of typing.*
 
 ---
 
