@@ -1,6 +1,7 @@
 # 🌳 NoSQL Internals: LSM Trees, WAL & Bloom Filters
 
 > **Source:** [HLD Multi Master 11 – YouTube](https://youtu.be/qSMB6nUloNE) by Scaler
+> **Additional Resources:** [Bloom Filters by Example](https://llimllib.github.io/bloomfilter-tutorial/) · [Bloom Filter Calculator](https://hur.st/bloomfilter/)
 > **Lecture Series:** Scaler HLD — Class 11
 > **Last Updated:** March 2026
 > **Goal:** Understand exactly how NoSQL databases store, retrieve, and manage data on disk — using the exact examples from the lecture.
@@ -52,7 +53,7 @@ SQL uses **B+ Trees** internally:
 
 ### NoSQL: Variable-Size Data → In-Place Updates Are Dangerous
 
-In a NoSQL document or key-value store, sizes are arbitrary:
+In a NoSQL document or key-value store, sizes are completely arbitrary:
 
 ```
 Key   → any string (variable length)
@@ -62,16 +63,19 @@ Value → any string / JSON (variable length)
 **From the lecture — the exact example:**
 
 ```
-Disk layout:
-  [Doc ID=10  |  { "name": "someone" }   ]  ← 100 bytes at offset 0
-  [Doc ID=30  |  { "name": "N" }         ]  ← 80 bytes at offset 104
+Disk layout (continuous bytes):
+  ┌──────────────────────────────────────────┬───────────────────────────┐
+  │ Doc ID=10 │ { "name": "someone" }        │ Doc ID=30 │ { "name":"N" }│
+  │  4 bytes  │       100 bytes              │   4 bytes │    80 bytes   │
+  └──────────────────────────────────────────┴───────────────────────────┘
+  offset=0                                    offset=104
 
 Update Doc ID=10:
   New value: { "name": "someone", "favorite_color": "red" }
-  New size = 140 bytes > original 100 bytes
+  New size  = 140 bytes  >  original 100 bytes
 
-  If we blindly overwrite:
-  → 40 bytes overflow into Doc ID=30's space ❌
+  Blindly overwriting:
+  → Extra 40 bytes bleed into Doc ID=30's space ❌
   → Doc ID=30 data is CORRUPTED
 ```
 
@@ -79,12 +83,12 @@ Update Doc ID=10:
 
 | Option | What Happens | Why It's Bad |
 |---|---|---|
-| Overwrite in-place (carelessly) | New data bleeds into the adjacent document | **Data corruption** |
+| Overwrite in-place (carelessly) | New data overwrites adjacent document | **Data corruption** |
 | Split document across disk | Doc stored in multiple non-contiguous locations | **Fragmentation → multiple disk seeks** |
 
 > *"The only safe solution for variable-size data: never update in-place. Just append at the end."* — Instructor
 
-**Why disk seeks are expensive:**
+**Why disk seeks are so expensive:**
 
 ```
 Hard Disk Architecture:
@@ -94,26 +98,34 @@ Hard Disk Architecture:
   │         │   Spinning Disk  │ ← 6800 RPM│
   │         │  ●─────────────► │           │
   │         └──────────────────┘           │
-  │   Track = one ring on the disk         │
+  │   Track = one ring = sequential data   │
   └────────────────────────────────────────┘
 
-  Sequential read:  Disk spins, head stays → FAST ✅
-  Changing track:   Head physically moves  → 100ms+ ❌
-  (Called a "disk seek")
+  Sequential read:  Disk spins, head stays   → FAST  ✅
+  Changing track:   Head physically moves    → 100ms+ ❌
+  (This physical movement is called a "disk seek")
 ```
 
-> Even for SSDs — sequential I/O is ~100x faster than random I/O. This holds for pretty much any memory model.
+```
+Memory Speed Hierarchy (approx):
+  RAM           →   100 ns    (baseline)
+  SSD random    →   100 µs    (1,000×  slower than RAM)
+  HDD seq.      →     1 ms    (10,000× slower)
+  HDD seek      →    10 ms    (100,000× slower than RAM)
+```
 
-**NoSQL Design Goals (from lecture):**
-- Optimise for **heavy write loads** (SQL is slow at writes due to B-tree overhead)
+> Even for SSDs — sequential I/O is ~100× faster than random I/O. This holds for any memory model.
+
+**NoSQL Design Goals:**
+- Optimise for **heavy write loads** (SQL writes are slow due to B-tree updates)
 - Never corrupt adjacent data when values change size
-- Avoid fragmentation (avoid multiple disk seeks per read)
+- Minimise disk seeks (avoid fragmentation)
 
 ---
 
 ## 2. Brute Force: Flat File Storage
 
-**Approach:** Write key-value pairs sequentially to a flat file.
+**Approach:** Write key-value pairs sequentially to a flat file — the simplest thing possible.
 
 ```
 file.db (flat file on disk, variable-size entries):
@@ -128,19 +140,19 @@ file.db (flat file on disk, variable-size entries):
 
 | Operation | Performance | Reason |
 |---|---|---|
-| Read key=60 | O(N) | Must linearly scan the entire file |
-| Write/Update key=60 | O(N) + dangerous | Scan to find it, then overwrite risks corruption |
+| Read key=060 | O(N) | Must linearly scan the entire file |
+| Write/Update key=060 | O(N) + ❌ dangerous | Find it, then new value may overflow next record |
 
 **Adding Append-Only Writes:**
 
-Instead of updating in-place, just **append** a new entry. If key=060 changes to "Shashank":
+Instead of overwriting, just **append** a new entry at the end. If key=060 → "Bishujit" needs to become "Shashank":
 
 ```
 file.db (append-only):
   key=001  value="V Prasad"
   key=002  value="N"
   key=100  value="Bit"
-  key=060  value="Bishujit"    ← old entry, still here
+  key=060  value="Bishujit"    ← old entry, still here (stale)
   key=030  value="Shashank"
   key=060  value="Shashank"    ← NEW entry appended at the end ✅
 
@@ -149,15 +161,15 @@ file.db (append-only):
 
 | Operation | Performance | Notes |
 |---|---|---|
-| Write | **O(1)** | Sequential append — no disk seek ✅ |
+| Write | **O(1)** | Sequential append, no disk seek ✅ |
 | Read  | O(N) | Still a linear scan (bottom to top) ❌ |
-| Duplicates | Accumulate | Both "Bishujit" and "Shashank" are on disk |
+| Duplicates | Accumulate | Both "Bishujit" and "Shashank" remain on disk |
 
 ---
 
 ## 3. Write-Ahead Log (WAL)
 
-Every database — especially NoSQL — maintains a **Write-Ahead Log (WAL)**: a purely **append-only file on disk** that records every change ever made.
+Every database — especially NoSQL — maintains a **Write-Ahead Log (WAL)**: a purely **append-only file on disk** that records every change ever made to the database.
 
 ```
 WAL File (on disk, append-only):
@@ -165,29 +177,35 @@ WAL File (on disk, append-only):
   SET  key=001  value="V Prasad"
   SET  key=002  value="N"
   SET  key=060  value="Bishujit"
-  SET  key=060  value="Shashank"   ← update appended, not overwritten
+  SET  key=060  value="Shashank"   ← update appended, NOT overwritten
   DEL  key=030
   ────────────────────────────────────────────────────
-  ← only appends; existing entries NEVER changed
+  ← only appends; existing entries NEVER modified
 ```
 
 ### Why WAL Exists
 
-| Use Case | How WAL Helps |
-|---|---|
-| **Crash Recovery** | On restart, replay the WAL to restore any in-memory state that was lost |
-| **Replication** | Slave asks the master: "What changed in the WAL?" and applies those changes |
-| **Point-in-Time Recovery** | Keep 7–30 days of WAL → restore the database to any exact moment in the past |
-| **DB Backups** | Back up WAL periodically; prune old sections after backup is confirmed |
+```mermaid
+graph LR
+    WAL["📄 WAL File\n(disk, append-only)"]
+
+    WAL --> CR["💥 Crash Recovery\nReplay WAL on restart to\nrestore lost in-memory state"]
+    WAL --> REP["🔄 Replication\nSlave reads WAL:\n'What changed?' → apply it"]
+    WAL --> PITR["⏰ Point-in-Time Recovery\nKeep 7–30 days of WAL\n→ restore DB to any past moment"]
+    WAL --> BACK["📦 DB Backups\nPeriodically back up WAL\nPrune old sections after backup"]
+```
 
 ### WAL Properties
 
-- Stored **on disk** — survives power failures
-- **Immutable** — existing entries never changed; only new entries appended
-- Any entry once written to WAL **stays there** until explicitly purged
-- Used by: Cassandra, PostgreSQL, SQLite, RocksDB, LevelDB
+| Property | Detail |
+|---|---|
+| **Storage** | On disk — survives power failures |
+| **Mutability** | Immutable — existing entries never changed; only appends |
+| **Purpose** | History of all events (not a snapshot of current state) |
+| **Purging** | Safe to prune old WAL sections once backed up/replicated |
+| **Used by** | Cassandra, PostgreSQL, SQLite, RocksDB, LevelDB |
 
-> **WAL ≠ Database Snapshot.** The database stores the *current state*. WAL stores the *entire event history* of all changes.
+> **WAL ≠ Database Snapshot.** The database is the *current state*. The WAL is the *full event history* of every change that built that state.
 
 ---
 
@@ -195,23 +213,23 @@ WAL File (on disk, append-only):
 
 **Problem:** Reads are still O(N) — scanning the whole WAL to find a key.
 
-**Solution:** Maintain an **in-memory hashmap** that maps every key to its **byte offset** in the WAL file.
+**Solution:** Maintain an **in-memory hashmap** mapping every key to its **byte offset** in the WAL file.
 
 ```
-    WAL File (on disk)                  Hashmap (in RAM)
-  ────────────────────────────────    ────────────────────────────
-  offset=0:   001 → "V Prasad"       001  →  offset 0
-  offset=100: 002 → "N"              002  →  offset 100
-  offset=150: 100 → "Bit"            100  →  offset 150
-  offset=210: 060 → "Bishujit"       060  →  offset 310  ← updated to latest
-  offset=250: 030 → "Shashank"       030  →  offset 250
-  offset=310: 060 → "Shashank"
-  ────────────────────────────────
+    WAL File (on disk)                    Hashmap (in RAM)
+  ──────────────────────────────────    ──────────────────────────────
+  offset=0:   001 → "V Prasad"          001  →  offset 0
+  offset=100: 002 → "N"                 002  →  offset 100
+  offset=150: 100 → "Bit"               100  →  offset 150
+  offset=210: 060 → "Bishujit"          060  →  offset 310  ← updated
+  offset=250: 030 → "Shashank"          030  →  offset 250
+  offset=310: 060 → "Shashank"     (latest entry for key=060)
+  ──────────────────────────────────
 ```
 
 ```python
 def read(key):
-    offset = hashmap[key]              # O(1) — RAM lookup
+    offset = hashmap[key]              # O(1) — pure RAM lookup
     buffer = file.read(n, offset)      # One disk seek to exact location
     key, value = parse(buffer)
     return value
@@ -222,34 +240,32 @@ def write(key, value):
     hashmap[key] = offset              # O(1) — update RAM hashmap
 ```
 
-**Why can't we just update in-place?**
+**Why can't we just overwrite in-place?**
 
 ```
-WAL has:  [060 | "Bishujit" | 40 bytes]  [030 | "Shashank" | 50 bytes]
+WAL has:  [060 | "Bishujit" | 40 bytes allocated] [030 | "Shashank"]
 
-We want:  [060 | "Shashank" | 50 bytes]
+Update to: "Shashank" (8 chars, but maybe needs 50 bytes total with metadata)
 
-"Shashank" (8 chars) doesn't fully fit in "Bishujit"'s (8 chars) space
-because "Bishujit" was only 40 bytes — the value "Shashank" might need 50 bytes.
-If it overflows, it corrupts "030 | Shashank" right after it. ❌
+"Bishujit" slot = 40 bytes. "Shashank" entry needs 50 bytes.
+→ Overflow: 10 bytes bleed into "030 | Shashank" ❌
+→ Data corruption.
 
 Rule: NEVER overwrite. ALWAYS append.
 ```
 
 **Performance:**
-- Writes: **O(1)** — append to WAL + hashmap update
+- Writes: **O(1)** — sequential append + hashmap update
 - Reads: **O(1)** — hashmap lookup + one disk seek
 
 ### 🚨 Big Problem: Hashmap Gets Too Large
-
-With **billions or trillions of keys**, the hashmap won't fit in RAM.
 
 ```
 1 billion keys × (avg key 50 bytes + offset 8 bytes) ≈ 58 GB hashmap
 
 Typical server RAM: 32–256 GB (shared with everything else)
-→ Trillions of keys? Impossible.
-→ Putting hashmap on disk? Makes reads slow again. ❌
+→ Trillions of keys? Impossible to fit in RAM.
+→ Moving hashmap to disk? Makes reads slow again. ❌
 ```
 
 > *"If you have trillions of keys and you put the hashmap on disk — life becomes slow again."* — Instructor
@@ -258,47 +274,49 @@ Typical server RAM: 32–256 GB (shared with everything else)
 
 ## 5. MemTable: Latest Chunk in Memory
 
-**Big Idea:** Instead of one giant WAL file, split it into **chunks**. Store the **latest (current) chunk in memory** as a structured in-memory buffer called the **MemTable**.
+**Big Idea:** Split the WAL into **chunks**. Store the **latest (current) chunk in memory** as a structured buffer — the **MemTable**.
 
 ```mermaid
 graph TD
-    subgraph RAM
-        MT["🧠 MemTable\n(BBST in memory)\n~100 MB\nLatest writes"]
-        BW["📝 Backup WAL\n(small, on disk)\nCrash recovery only"]
-    end
-
-    subgraph DISK
-        SST1["1.sst  (older)"]
-        SST2["2.sst  (older)"]
-        SST3["3.sst  (older)"]
-    end
-
-    Client["Write Request"] --> MT
+    Client["✍️ Write Request"] --> MT
     Client --> BW
-    MT -->|"full → flush"| SST1
-    BW -.->|"deleted after flush"| DISK
+
+    subgraph RAM ["🧠 RAM"]
+        MT["MemTable\nBalanced BST\n~100 MB\nLatest writes (no duplicates)"]
+        BW["Backup WAL\n(tiny, ~100 MB)\nCrash recovery only"]
+    end
+
+    subgraph DISK ["💾 Disk"]
+        S1["1.sst"]
+        S2["2.sst"]
+        S3["3.sst"]
+    end
+
+    MT -->|"Flush when full"| S1
+    BW -.->|"Deleted after flush"| DISK
 ```
 
 ### Why Balanced BST (BBST) — Not a Hashmap?
 
-| Data Structure | Read/Write | Sorted Output When Dumped? | Space Waste |
+| Data Structure | Read/Write | When Dumped to Disk | Space Waste |
 |---|---|---|---|
-| **Hashmap** | O(1) | ❌ No — flat unordered file, reads become O(N) | High (empty slots) |
-| **Balanced BST** | O(log N) | ✅ Yes — in-order traversal is automatically sorted | Minimal (just pointers) |
+| **Hashmap** | O(1) | ❌ Flat unordered file → reads become O(N) | High (empty slots) |
+| **Balanced BST** | O(log N) | ✅ In-order traversal = **automatically sorted** | Minimal — just pointers |
 
-> **MemTable = Balanced Binary Search Tree (Red-Black Tree / AVL Tree / Skip List) in memory.**
+> **MemTable = Balanced Binary Search Tree (Red-Black Tree / AVL Tree / Skip List) in RAM.**
 
 ```
 MemTable (RAM, BBST):
 
-           key=3 (value=Y)
-          /               \
-     key=1 (val=W)     key=5 (val=C)
+           key=3 (val=Y)
+          /              \
+     key=1 (val=W)    key=5 (val=C)
           \
        key=2 (val=X)
 
-In-order traversal → [key=1, key=2, key=3, key=5]  ← sorted ✅
-Flush to disk        → SSTable is automatically sorted ✅
+In-order traversal → [key=1, key=2, key=3, key=5]   ← sorted ✅
+Flush to disk       → SSTable is automatically sorted ✅
+No duplicates       → each key appears once ✅
 ```
 
 ### MemTable Write Flow
@@ -307,47 +325,44 @@ Flush to disk        → SSTable is automatically sorted ✅
 Write request: SET key=3, value=X
 
 Step 1: Append to Backup WAL on disk (crash recovery insurance)
-        backup.wal:  | ... | SET key=3 value=X |
+        backup.wal: | ... | SET key=3 value=X |
 
-Step 2: Insert/Update key=3 in the BBST (in memory)
-        No duplicates — existing node updated directly.
+Step 2: Insert/Update key=3 in the BBST (all in memory)
+        If key=3 already exists → just update the node. No duplicates.
 
-Step 3: ACK client ✅  (ultra fast — all in memory)
+Step 3: ACK client ✅  (ultra fast — purely in RAM)
 ```
 
 ### MemTable as Read Cache
 
-The MemTable is the **hottest read cache** in the system:
-- Recently written data is also often recently read
-- If key is in MemTable → return from RAM, **zero disk access**
+The MemTable is the **hottest read cache** in the system.
 
 ```
 Read key=3:
-  ① Check MemTable → FOUND (key=3 → X) → return X ✅  (microseconds)
+  ① Check MemTable → FOUND (key=3 → X) → return X ✅  (microseconds, zero disk)
 
 Read key=060 (old data, not in MemTable):
   ① Check MemTable → NOT FOUND
-  ② Must look in SSTables on disk (covered in Section 9)
+  ② Must look in SSTables on disk → (covered in Sections 9 & 10)
 ```
 
-### When MemTable is Full → Flush to Disk
-
-When MemTable exceeds the configured threshold (~100 MB):
+### When MemTable is Full → Flush to SSTable
 
 ```
-MemTable FULL → flush in-order traversal → new SSTable file on disk
-             → delete Backup WAL (data safely persisted)
-             → clear MemTable (reset)
-             → begin new empty MemTable + new Backup WAL
+MemTable FULL (~100 MB reached):
+  → Flush in-order traversal → new SSTable file on disk (sorted, immutable)
+  → Delete Backup WAL (data safely persisted to disk)
+  → Reset (clear) MemTable → begin fresh BBST
+  → Start new Backup WAL
 ```
 
-Because MemTable was a BBST, its in-order dump is **automatically sorted**.
+Because the MemTable was a BBST, its flush is **automatically sorted** — no extra sort step needed.
 
 ---
 
 ## 6. SSTables: Sorted String Tables
 
-When the MemTable flushes, it creates an **SSTable (Sorted String Table)**: an immutable, sorted file on disk. These are no longer called "WAL chunks" — they have their own name because they are sorted and serve a different purpose.
+When the MemTable flushes, it creates an **SSTable (Sorted String Table)** — an immutable, sorted file on disk.
 
 ```
 SSTable File (on disk, immutable):
@@ -357,155 +372,100 @@ SSTable File (on disk, immutable):
   key=3  →  value=C
   ──────────────────────────────────────────────
 
-  ✅  Sorted by key (from in-order BBST dump)
-  ✅  No duplicates WITHIN this file
+  ✅  Sorted by key
+  ✅  No duplicates within this one file
   ✅  Immutable — never modified after creation
-  ✅  Binary search possible (sorted!)
-  ❌  Duplicates CAN exist ACROSS different SSTable files
+  ✅  Binary search is possible (it's sorted!)
+  ❌  Duplicates CAN exist across different SSTable files
 ```
 
 ### Multiple SSTables Over Time
 
-As writes continue, MemTable fills and flushes repeatedly (from the lecture's dry run):
-
 ```
-Disk:
-  1.wl  [key=1→A, key=2→B, key=3→C]            ← oldest flush
-  2.wl  [key=1→X, key=4→D, key=5→C, key=2→W]   ← second flush (sorted)
-  3.wl  [key=1→Y, key=2→W, key=3→X]            ← newest flush
+Disk (after 3 MemTable flushes + current MemTable in RAM):
 
-MemTable (RAM, current):
-         { key=2→X, key=3→Y, key=1→W }          ← latest writes
+  1.wl: [key=1→A, key=2→B, key=3→C]             ← oldest flush
+  2.wl: [key=1→X, key=2→W, key=4→D, key=5→C]    ← second flush
+  3.wl: [key=1→Y, key=2→W, key=3→X]             ← newest flush
 
-Observation: key=1 appears in ALL three places.
-             Most recent = latest SSTable or MemTable.
+  MemTable (RAM): { key=2→X, key=3→Y, key=1→W } ← latest in-memory
+
+  Key=1 appears in ALL four places → most recent wins.
 ```
 
-### Background Compaction
+### Background Compaction (Merge Sort)
 
-A background process periodically merges older SSTables using **merge sort**:
+A background process periodically merges older SSTables:
+
+```mermaid
+graph LR
+    subgraph "Before"
+        S1["1.wl\n[1→A, 2→B, 3→C]"]
+        S2["2.wl\n[1→X, 4→D, 5→C]"]
+    end
+
+    S1 -->|"merge sort\n(background)"| XL["XL1.sst\n[1→X, 2→W, 3→C, 4→D, 5→C]"]
+    S2 --> XL
+
+    subgraph "After"
+        XL
+    end
+```
 
 ```
-Before compaction:
-  1.wl  [key=1→A, key=2→B, key=3→C]
-  2.wl  [key=1→X, key=4→D, key=5→C, key=2→W]
-
-Compaction (merge sort, keep latest value for duplicates):
-  key=1: both files have it → keep latest (2.wl) → 1→X
-  key=2: both files have it → keep latest (2.wl) → 2→W
-  key=3: only 1.wl                              → 3→C
-  key=4: only 2.wl                              → 4→D
-  key=5: only 2.wl                              → 5→C
+Merge logic (keep latest value for duplicates):
+  key=1: in both 1.wl(→A) and 2.wl(→X) → keep 2.wl (newer) → 1→X
+  key=2: only in 1.wl                                        → 2→B (wait, 2→W from 2.wl)
+  key=3: only in 1.wl                                        → 3→C
+  key=4: only in 2.wl                                        → 4→D
+  key=5: only in 2.wl                                        → 5→C
 
 XL1.sst: [key=1→X, key=2→W, key=3→C, key=4→D, key=5→C]
-Delete 1.wl and 2.wl. Update hashmap. ✅
+Delete 1.wl and 2.wl. ✅
 ```
 
 > ⚠️ **Tuning Compaction is Critical in Production.**
-> When deploying Cassandra or any LSM-based store, poorly tuned compaction directly hurts performance.
-> Tune: chunk size, compaction frequency, time of day (run during lowest traffic — e.g., 3 AM).
+> When deploying Cassandra or any LSM-based store, poorly tuned compaction directly hurts read **and** write performance.
+> Tune: chunk size, compaction frequency, run during lowest traffic (e.g., 3 AM).
 
 ---
 
 ## 7. Full Dry Run: Keys 1–5
 
-This is the exact dry run from the lecture. Chunk size = 3 (MemTable can hold 3 key-value pairs).
+This is the exact step-by-step dry run from the lecture. Chunk size = 3.
 
-**Initial State:**
+**Initial State (disk + RAM):**
 
 ```
 Disk (SSTables):
-  1.wl: [1→A, 2→B, 3→C]       ← oldest
-  2.wl: [1→X, 4→D, 5→C]       ← second  (note: 2→W and others)
-  3.wl: [1→Y, 2→W, 3→X]       ← newest
+  1.wl: [1→A, 2→B, 3→C]        ← oldest
+  2.wl: [1→X, 4→D, 5→C]        ← second
+  3.wl: [1→Y, 2→W, 3→X]        ← newest
 
 MemTable (RAM, BBST): empty
+Backup WAL (disk):    empty
 
 Hashmap (RAM):
-  key=1 → "3.wl"   (latest location for key=1)
+  key=1 → "3.wl"   (latest for key=1)
   key=2 → "3.wl"
   key=3 → "3.wl"
   key=4 → "2.wl"
   key=5 → "2.wl"
-
-Backup WAL (disk): empty
 ```
 
----
+| Step | Operation | MemTable State | Notes |
+|---|---|---|---|
+| 1 | WRITE key=3 → X | `{3→X}` | Append to backup WAL + update BBST |
+| 2 | READ key=1 | `{3→X}` | Not in MemTable → hashmap → 3.wl → binary search → **return Y** |
+| 3 | WRITE key=3 → Y | `{3→Y}` | Update existing node in BBST (no duplicate) |
+| 4 | WRITE key=2 → X | `{2→X, 3→Y}` | Insert new node |
+| 5 | READ key=2 | `{2→X, 3→Y}` | Found in MemTable → **return X** (zero disk access) |
+| 6 | WRITE key=1 → W | `{1→W, 2→X, 3→Y}` | **MemTable now FULL** (chunk size = 3) |
 
-**Operation: WRITE key=3, value=X**
-
-```
-① Append to Backup WAL:   backup.wal → | SET 3=X |
-② Update MemTable (BBST): key=3 → X
-③ ACK client ✅
-
-MemTable now: { key=3 → X }
-```
-
----
-
-**Operation: READ key=1**
+**MemTable Full → Flush:**
 
 ```
-① Check MemTable → key=1 NOT in MemTable
-② Look at Hashmap → key=1 → "3.wl"
-③ 3.wl is sorted → binary search for key=1 → FOUND: value=Y ✅
-
-Return: Y
-```
-
----
-
-**Operation: WRITE key=3, value=Y**
-
-```
-① Append to Backup WAL:   backup.wal → | SET 3=X | SET 3=Y |
-② Update MemTable (BBST): key=3 → Y   (updates the node, no duplicate)
-③ ACK client ✅
-
-MemTable now: { key=3 → Y }
-```
-
----
-
-**Operation: WRITE key=2, value=X**
-
-```
-① Append to Backup WAL.
-② Insert key=2→X into MemTable BBST.
-③ ACK client ✅
-
-MemTable now: { key=2→X, key=3→Y }
-```
-
----
-
-**Operation: READ key=2**
-
-```
-① Check MemTable → key=2 FOUND → return X ✅
-   (No disk access at all — pure RAM speed)
-```
-
----
-
-**Operation: WRITE key=1, value=W**
-
-```
-① Append to Backup WAL.
-② Insert key=1→W into MemTable.
-③ ACK client ✅
-
-MemTable now: { key=1→W, key=2→X, key=3→Y }  ← FULL (chunk size = 3)
-```
-
----
-
-**MemTable Full → Flush**
-
-```
-MemTable BBST in-order traversal: [1→W, 2→X, 3→Y]  ← sorted automatically
+In-order traversal of BBST: [1→W, 2→X, 3→Y]  ← sorted automatically ✅
 
 Flush to disk as 4.wl: [key=1→W, key=2→X, key=3→Y]
 
@@ -516,46 +476,43 @@ Update Hashmap:
   key=4 → "2.wl"   (unchanged)
   key=5 → "2.wl"   (unchanged)
 
-Clear MemTable → empty BBST
-Delete Backup WAL → create new empty one
+Clear MemTable → empty BBST.  Delete Backup WAL.
 ```
 
----
-
-**Background Compaction: 1.wl + 2.wl + 3.wl → XL1.sst**
+**Background Compaction: 1.wl + 2.wl + 3.wl → XL1.sst:**
 
 ```
-Merge 1.wl, 2.wl, 3.wl using merge sort, keep latest:
+Merge-sort all three SSTables, keep latest per key:
 
-  key=1: present in all three → latest is 3.wl → 1→Y
-  key=2: present in 1.wl, 3.wl → latest is 3.wl → 2→W
-  key=3: present in 1.wl, 3.wl → latest is 3.wl → 3→X
-  key=4: only in 2.wl → 4→D
-  key=5: only in 2.wl → 5→C
+  key=1: in 1.wl(→A), 2.wl(→X), 3.wl(→Y) → latest is 3.wl → 1→Y
+  key=2: in 1.wl(→B), 3.wl(→W)            → latest is 3.wl → 2→W
+  key=3: in 1.wl(→C), 3.wl(→X)            → latest is 3.wl → 3→X
+  key=4: only in 2.wl                       → 4→D
+  key=5: only in 2.wl                       → 5→C
 
-XL1.sst: [key=1→Y, key=2→W, key=3→X, key=4→D, key=5→C]
+XL1.sst: [1→Y, 2→W, 3→X, 4→D, 5→C]
 
 Delete 1.wl, 2.wl, 3.wl.
-Update Hashmap:
-  key=1 → "XL1.sst"   (was "3.wl", defer to 4.wl if needed)
-  key=2 → "XL1.sst"
-  ...
 
 Final disk state:
-  XL1.sst: [1→Y, 2→W, 3→X, 4→D, 5→C]   ← compacted
-  4.wl:    [1→W, 2→X, 3→Y]              ← most recent flush
+  XL1.sst: [1→Y, 2→W, 3→X, 4→D, 5→C]  ← compacted (older)
+  4.wl:    [1→W, 2→X, 3→Y]             ← newest flush
 ```
 
 ---
 
 ## 8. LSM Tree: The Full Architecture
 
-Multiple levels of SSTables, growing in size as they get compacted downward, form a **Log-Structured Merge Tree (LSM Tree)**.
+<p align="center">
+  <img src="images/lsm_tree_architecture.png" alt="LSM Tree Architecture" width="800">
+</p>
+
+Multiple levels of SSTables form a **Log-Structured Merge Tree (LSM Tree)**:
 
 ```
                     ┌──────────────────────────────────┐
                     │      MemTable  (RAM, BBST)        │  ← ALL writes go here
-                    │      ~100 MB                      │
+                    │      ~100 MB, no duplicates       │
                     └─────────────────┬────────────────┘
                                       │ flush when full
                     ┌─────────────────▼────────────────┐
@@ -565,22 +522,26 @@ Multiple levels of SSTables, growing in size as they get compacted downward, for
                                       │ compaction (merge sort)
                     ┌─────────────────▼────────────────┐
     Level 1         │      sst_A          sst_B        │  ← larger, ~200–500 MB
-    (disk)          │      sorted, non-overlapping      │
+    (disk)          │      sorted, non-overlapping keys │
                     └─────────────────┬────────────────┘
                                       │ compaction
                     ┌─────────────────▼────────────────┐
-    Level 2         │             sst_XL               │  ← largest, 1 GB+
-    (disk)          │         fully de-duplicated       │
+    Level 2         │             sst_XL               │  ← 1 GB+, fully merged
+    (disk)          │       no duplicates at all        │
                     └──────────────────────────────────┘
 
-    WAL (disk):         only for MemTable crash recovery
-                        deleted after each MemTable flush
+    WAL (disk, separate):
+                    │ Crash recovery only               │
+                    │ Deleted after each MemTable flush │
 ```
 
 **Complexity:**
-- **Write: O(1)** — append to backup WAL + BBST insert in MemTable
-- **Read: O(log N)** — MemTable check + linear scan over small # of SSTables + binary search per SSTable
-- **Number of SSTables** is always small (O(log N)) because compaction keeps merging them
+
+| Operation | Complexity | Why |
+|---|---|---|
+| **Write** | O(1) | Append to backup WAL + BBST update in memory |
+| **Read** | O(log N) | MemTable check + scan over O(log N) SSTables |
+| **SSTable count** | O(log N) | Compaction continuously merges them down |
 
 > *"The number of SS tables is kept small by the compaction process — it's order log(N)."* — Instructor
 
@@ -588,11 +549,11 @@ Multiple levels of SSTables, growing in size as they get compacted downward, for
 
 ## 9. Sparse Index: Memory-Efficient Lookup
 
-**Problem:** The hashmap storing `key → SSTable name` has one entry per unique key. With billions of keys this is enormous and won't fit in RAM.
+**Problem:** The hashmap of `key → SSTable name` has one entry per key. Billions of keys = hashmap too big for RAM.
 
-**Solution:** For each SSTable, keep a **Sparse Index** in memory — store only the **first key of every 64 KB block**, not every key.
+**Solution:** For each SSTable, maintain a **Sparse Index** in memory — store only the **first key of every 64 KB block**.
 
-### Building the Sparse Index (from the lecture's exact example)
+### Building the Sparse Index
 
 ```
 SSTable on disk (1 GB, sorted):
@@ -601,28 +562,23 @@ SSTable on disk (1 GB, sorted):
   Block 1  (offset=65536,   64 KB): key=101  ... key=2010
   Block 2  (offset=131072,  64 KB): key=2011 ... key=5000
   ...
-  Block 16383 (last block,  64 KB): key=...  ... key=N
+  Block 16383 (last, 64 KB):        key=...  ... key=N
 
-Sparse Index (in RAM, for this one SSTable):
+Sparse Index (stored in RAM — one entry per block):
   ┌─────────────────────────────────────────┐
   │  key=0    → offset 0                   │
   │  key=101  → offset 65,536              │
   │  key=2011 → offset 131,072             │
   │  ...                                   │
   └─────────────────────────────────────────┘
-```
 
-**How many entries?**
-
-```
-Total chunks = 1 GB / 64 KB = 2^30 / 2^16 = 2^14 ≈ 16,000 chunks
-
-Average key size = 64 bytes
+Total blocks      = 1 GB / 64 KB = 2^14 ≈ 16,000
+Average key size  = 64 bytes
 Sparse Index size = 16,000 × 64 bytes ≈ 1 MB
 
-vs. full key index for all values in 1 GB → ~100 MB or more
+vs. full key index for 10M keys → hundreds of MB
 
-→ 1000× reduction in memory! 🎉
+→ 1000× reduction in index memory! 🎉
 ```
 
 > *"If this SS table is 1 GB, this sparse index is only 1 MB — a 1000x reduction!"* — Instructor
@@ -632,55 +588,64 @@ vs. full key index for all values in 1 GB → ~100 MB or more
 **Example: Read key=300**
 
 ```
-Step 1: Binary search the Sparse Index (in RAM — very fast):
+Step 1: Binary search the Sparse Index (purely in RAM):
         Entries: key=0(offset=0), key=101(offset=65536), key=2011(offset=131072)
 
         key=101 ≤ 300 < key=2011
         → key=300 must be in Block 1, starting at offset=65536
 
-Step 2: One disk seek to offset=65536
-        Read the 64 KB block into RAM
+Step 2: One disk seek to offset=65536 → read 64 KB block into RAM
 
 Step 3: Binary search within the 64 KB block (in RAM):
         Block 1: [key=101, key=150, key=200, key=300, key=400...]
         → Found: key=300 → return value ✅
 
-Total cost: 1 disk seek per SSTable checked
+Cost: 1 disk seek per SSTable checked.
 ```
 
-> *"Reading a 64 KB block = 1 disk seek. 64 KB is exactly one track on a spinning disk — the most efficient read possible."*
-
-**If key=300 is not in this SSTable:**
-→ Move to the next SSTable's sparse index and repeat
-
-The number of SSTables to check = small (O(log N)) due to compaction.
+> *"64 KB is exactly the size of one track on a spinning disk — so reading a 64 KB block = exactly one disk seek. As efficient as it gets."*
 
 ```mermaid
 flowchart TD
-    A["Read: key=300"] --> B["Binary search\nSparse Index in RAM"]
-    B --> C["key=101 ≤ 300 < key=2011\n→ it's in Block 1 (offset=65536)"]
-    C --> D["One disk seek\n→ Read 64 KB block"]
-    D --> E["Binary search\nwithin 64 KB block in RAM"]
+    A["Read: key=300"] --> B["Binary search\nSparse Index in RAM\n(tiny, very fast)"]
+    B --> C["key=101 ≤ 300 < key=2011\n→ Block 1 at offset=65536"]
+    C --> D["💾 One disk seek\n→ Read 64 KB block"]
+    D --> E["Binary search\n64 KB block in RAM"]
     E --> F{Found?}
-    F -->|"Yes"| G["✅ Return value"]
-    F -->|"No"| H["Check next SSTable\n(repeat)"]
+    F -->|"Yes ✅"| G["Return value"]
+    F -->|"No"| H["Go to next SSTable\n(repeat)"]
 ```
 
 ---
 
 ## 10. Bloom Filters: Skip Unnecessary Reads
 
-**Problem:** If a read request arrives for a key that **doesn't exist**, we still scan all SSTable sparse indexes and do a disk seek per SSTable — only to find nothing. Wasted work.
+**Problem:** When a key doesn't exist anywhere, we still check every SSTable's sparse index and do a disk seek per SSTable — only to find nothing.
 
-**Solution:** A **Bloom Filter** — a probabilistic, fixed-size bit array that tells you, with high probability, whether a key was ever inserted.
+**Solution:** A **Bloom Filter** — a probabilistic, fixed-size bit array that tells you whether a key was ever inserted.
 
-### Bloom Filter Guarantees
+<p align="center">
+  <img src="images/bloom_filter_diagram.png" alt="Bloom Filter Visual" width="800">
+</p>
+
+### Bloom Filter — Core Idea
+
+> *"A Bloom filter is a data structure designed to tell you, rapidly and memory-efficiently, whether an element is present in a set."*
+> — [Bloom Filters by Example](https://llimllib.github.io/bloomfilter-tutorial/)
+
+**Two operations only:**
+1. `insert(key)` — mark this key as present
+2. `contains(key)` → TRUE (maybe present) or FALSE (definitely absent)
+
+**Guarantees:**
 
 ```
-If key IS present     → ALWAYS returns TRUE   (zero false negatives) ✅
-If key IS NOT present → returns FALSE (mostly) ✅
-                        with small probability returns TRUE (false positive) ⚠️
+If key IS present     → ALWAYS returns TRUE      (zero false negatives) ✅
+If key IS NOT present → returns FALSE (usually)  ✅
+                        tiny chance of TRUE       (false positive) ⚠️
                         → tunable rate (e.g., 1%)
+
+Size NEVER grows regardless of how many keys are inserted. ← The Magic!
 ```
 
 > *"In case of a set or hashmap, as you insert more data, the size will grow. In case of a bloom filter, the size does not change at all. That is magic."* — Instructor
@@ -690,178 +655,222 @@ If key IS NOT present → returns FALSE (mostly) ✅
 **Setup:**
 
 ```
-Bloom Filter = bit array of size M=12, all zeros initially:
+Bloom Filter = bit array of size M=12, all zeros:
 
-  [ 0  0  0  0  0  0  0  0  0  0  0  0 ]
-    0  1  2  3  4  5  6  7  8  9  10  11
+  Index:  0   1   2   3   4   5   6   7   8   9  10  11
+         ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+  Bits:  │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │
+         └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
 
 K = 3 hash functions: h1, h2, h3
 ```
 
----
-
-**INSERT "Nikl":**
+**INSERT "Nikl"** — pass through all 3 hash functions, set those bits:
 
 ```
-h1("Nikl") = 2  → set bit[2] = 1
-h2("Nikl") = 3  → set bit[3] = 1
-h3("Nikl") = 9  → set bit[9] = 1
+h1("Nikl") = 2  → bit[2] = 1
+h2("Nikl") = 3  → bit[3] = 1
+h3("Nikl") = 9  → bit[9] = 1
 
-[ 0  0  1  1  0  0  0  0  0  1  0  0 ]
-         ↑  ↑              ↑
+  Index:  0   1   2   3   4   5   6   7   8   9  10  11
+         ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+  Bits:  │ 0 │ 0 │ 1 │ 1 │ 0 │ 0 │ 0 │ 0 │ 0 │ 1 │ 0 │ 0 │
+         └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
+                  ↑   ↑                   ↑
+              "Nikl" bits
 
-Did the size of the bloom filter change? ❌ No.
-Size is always M=12, regardless of how many keys we insert.
+Did the size of the filter change? ❌ No. Still M=12 bits.
 ```
-
----
 
 **INSERT "Vishal":**
 
 ```
 h1("Vishal") = 2  → bit[2] already 1 (no change)
-h2("Vishal") = 5  → set bit[5] = 1
-h3("Vishal") = 11 → set bit[11] = 1
+h2("Vishal") = 5  → bit[5] = 1
+h3("Vishal") = 11 → bit[11] = 1
 
-[ 0  0  1  1  0  1  0  0  0  1  0  1 ]
+  Index:  0   1   2   3   4   5   6   7   8   9  10  11
+         ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+  Bits:  │ 0 │ 0 │ 1 │ 1 │ 0 │ 1 │ 0 │ 0 │ 0 │ 1 │ 0 │ 1 │
+         └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
 ```
 
----
-
-**CHECK "V Prasad" (never inserted): h → {1, 3, 7}**
+**CHECK "V Prasad"** (never inserted) — hash → {1, 3, 7}:
 
 ```
-bit[1] = 0 → IMMEDIATE: "V Prasad" DEFINITELY NOT present ✅
+  bit[1] = 0  ← STOP! Any zero bit = DEFINITE NO ✅
 
-→ Skip this SSTable entirely — no disk seek needed! 🎉
+  → "V Prasad" is NOT in this SSTable.
+  → Skip this SSTable — no disk seek needed! 🎉
 ```
 
----
-
-**CHECK "Abhishek" (never inserted): h → {3, 9, 11}**
+**CHECK "Abhishek"** (never inserted) — hash → {3, 9, 11}:
 
 ```
-bit[3] = 1 ✓
-bit[9] = 1 ✓
-bit[11]= 1 ✓
-→ All bits set → Bloom Filter says "MAYBE EXISTS" ⚠️
+  bit[3]  = 1 ✓
+  bit[9]  = 1 ✓
+  bit[11] = 1 ✓   ← all bits are 1!
 
-→ Must search the SSTable → key not found → FALSE POSITIVE
-  (Rare, tunable to ≤1%)
+  → Bloom Filter says: "MAYBE EXISTS" ⚠️
+  → Must search the SSTable on disk
+  → Not found → FALSE POSITIVE (rare, tunable)
 ```
 
 ### False Positive Formula
 
+From [llimllib.github.io/bloomfilter-tutorial](https://llimllib.github.io/bloomfilter-tutorial/):
+
 ```
 P(false positive) ≈ (1 - e^(-k·n/m))^k
 
-Where:
+Variables:
   k = number of hash functions
-  n = number of keys inserted
-  m = number of bits in the filter
+  n = number of keys inserted into the filter
+  m = number of bits in the filter (= M)
 
-From the lecture's calculator demo:
-  n = 1,000,000,000  (1 billion keys)
-  k = 7 hash functions
-  m = 1 GB = 8 × 10^9 bits (approximately)
-
-  → False positive rate ≈ 1%
-
-vs. storing 1 billion keys explicitly:
-  1 billion × 100 bytes/key = 100 GB ← won't fit in RAM ❌
-  Bloom filter: just 1 GB ← trivially manageable ✅
+Optimal number of hash functions:
+  k_optimal = (m/n) × ln(2)   ← choose this k for minimum false positives
 ```
 
-### CDN Use Case (Akamai / Cloudflare) — From the Lecture
-
-> *"70% of URLs on the internet are only visited once. CDNs like Akamai cache a URL only after it has been visited twice."*
+**From the lecture's calculator demo ([hur.st/bloomfilter](https://hur.st/bloomfilter/)):**
 
 ```
+n = 1,000,000,000  (1 billion keys)
+p = 0.01           (1% false positive rate — target)
+k = 7              (optimal hash functions)
+m = 1 GB           (filter size in bits)
+
+→ False positive rate ≈ 1% ✅
+
+vs. storing 1 billion keys in a hashmap:
+    1 billion × 100 bytes/key = 100 GB  ← won't fit in RAM ❌
+    Bloom filter: just 1 GB             ← trivially fits ✅
+
+Space savings: ~100× 🎉
+```
+
+### Choosing the Right Filter Size (from the Tutorial)
+
+To configure a Bloom filter for your application:
+
+1. **Choose `n`** — estimate how many keys you'll insert
+2. **Choose `m`** — pick a bit-array size you can afford in memory
+3. **Calculate optimal `k`** = `(m/n) × ln(2)`
+4. **Calculate false positive rate** = `(1 - e^(-k·n/m))^k`
+5. If false positive rate is too high → increase `m` and repeat
+
+> **Key insight:** A larger filter = fewer false positives.
+> Time complexity: O(k) for both insert and lookup — always constant regardless of how many elements are stored.
+
+### Real-World Use Cases
+
+**1. CDN (Akamai / Cloudflare) — from the lecture:**
+
+```
+Fact: 70% of URLs on the internet are visited only ONCE.
+      CDNs cache a URL only after it has been visited TWICE.
+
 Problem:
-  To know if a URL was seen before → need to store all seen URLs
-  Trillion URLs × 500 bytes/URL average = 500 TB ← impossible as hashmap ❌
+  Store all seen URLs to detect second-visit:
+  Trillion URLs × 500 bytes/URL = 500 TB hashmap ❌
 
 Solution with Bloom Filter:
-  First visit → insert URL into bloom filter (don't cache yet)
-  Second visit → bloom filter says "seen before" → cache it ✅
+  First visit  → insert URL into Bloom Filter (don't cache yet)
+  Second visit → Bloom Filter says "seen before" → cache it ✅
 
-  Bloom filter stores 1 trillion URL presence checks in:
-  Just a few GB (with ~1% false positive rate) ✅
-
-  Savings: 500 TB → a few GB  (massive reduction!)
+  Filter size: a few GB (vs 500 TB) — 100,000× smaller!
 ```
+
+**2. Other real-world uses (from resources):**
+
+| Use Case | How Bloom Filter Helps |
+|---|---|
+| **NoSQL (Cassandra, RocksDB)** | Check if key exists in SSTable before disk seek |
+| **Medium/News sites** | Track articles already read by a user |
+| **Bitcoin clients** | SPV clients use BF to filter relevant transactions |
+| **Malicious URL detection** | Chrome uses BF to quickly flag dangerous URLs |
+| **Cache filtering** | Avoid caching one-hit-wonders (items requested only once) |
+| **Database query optimisation** | Skip entire SSTables that cannot contain a key |
+
+**3. Real databases using Bloom Filters (from tutorial):**
+- **ScyllaDB** — uses MurmurHash for bloom filters
+- **RocksDB** — built-in bloom filter per SSTable
+- **Apache Spark** — BloomFilterImpl
+- **SQLite** — used internally for query optimization
+- **Chromium browser** — detects malicious URLs
+- **InfluxDB** — for time-series data lookups
 
 ---
 
 ## 11. Tombstones: How Deletion Works
 
-**Problem:** SSTables are immutable — you can't remove an entry from them. And Bloom Filters **never forget** — once a key's bits are set, you cannot unset them.
+**Problem:**
+- SSTables are **immutable** — you can't remove an entry from them
+- Bloom Filters **never forget** — once bits are set, they cannot be unset
 
-**How do you delete a key?**
+**Solution: Tombstones** — a special sentinel value meaning "this key has been deleted."
 
 ### Deletion = Write a Tombstone
-
-A **tombstone** is a special sentinel value meaning "this key has been deleted":
 
 ```
 DELETE key=060
 
-Step 1: Write a tombstone to MemTable:
-        MemTable: key=060 → TOMBSTONE
+Step 1: Write tombstone to MemTable:
+        MemTable: key=060 → TOMBSTONE  (a special marker value)
 
-Step 2: Tombstone flushes to SSTable like any normal write:
+Step 2: Tombstone flushes to SSTable just like any normal value:
         sst_X: [..., key=060 → TOMBSTONE, ...]
 
-Step 3: On read — if tombstone found:
-        value = TOMBSTONE → return "key not found" to client
+Step 3: On any future read for key=060:
+        Value = TOMBSTONE → return "key not found" to client
 ```
 
-### Why Not Delete Directly from SSTable?
+### Why Not Just Delete From the Bloom Filter?
 
 ```
-SSTable is immutable. You cannot remove an entry.
+Bloom Filter: NO delete operation exists.
 
-What if you just delete from the MemTable and don't add a tombstone?
-  Next read for key=060:
-    ① Not in MemTable (just deleted)
-    ② Bloom Filter: says "maybe exists" (it will always say this!)
-    ③ Must scan ALL SSTables — wastes a lot of I/O just to find nothing ❌
-```
+"Bloom filter never forgets." — Instructor
 
-### Why Not Delete from the Bloom Filter?
+When key=060 was first written → some bits (e.g., 3, 9, 11) were set.
+Even after the key is deleted:
+  → Those bits stay 1.
+  → Bloom Filter will ALWAYS say "key=060 maybe exists".
 
-```
-Bloom Filter has NO delete operation. It's a one-way door.
+Without a tombstone:
+  Every read for deleted key=060:
+    ① Bloom filter: "maybe"
+    ② Scan ALL SSTables (waste of disk I/O!) ← bad ❌
 
-"Bloom filter never forgets."  — Instructor
-
-When key=060 was first written → bits 2, 5, 11 were set (for example).
-Even after deleting key=060 → those bits stay set.
-The Bloom Filter will ALWAYS say "key=060 maybe exists".
-
-With tombstone:
-  Bloom filter says "maybe" → seek into newest SSTable
-  → Find TOMBSTONE immediately → return "not found" ✅
-  → No need to check older SSTables!
+With a tombstone:
+  Every read for deleted key=060:
+    ① Bloom filter: "maybe"
+    ② Seek into newest SSTable
+    ③ Find TOMBSTONE immediately
+    ④ Return "not found" — no need to check older SSTables ✅
 ```
 
 ### Tombstone During Compaction
 
-```
-Before compaction:
-  sst1 (older): key=060 → "Bishujit"    ← original value
-  sst2 (newer): key=060 → TOMBSTONE     ← delete marker
+```mermaid
+graph LR
+    subgraph "Before Compaction"
+        S1["sst1 (older)\nkey=060 → 'Bishujit'"]
+        S2["sst2 (newer)\nkey=060 → TOMBSTONE"]
+    end
 
-Compaction (keep latest):
-  key=060 → TOMBSTONE   ← "Bishujit" discarded
+    S1 -->|"compaction\n(keep latest)"| R["Result\nkey=060 → TOMBSTONE"]
+    S2 --> R
 
-  much later (after tombstone fully propagated across all nodes):
-  key=060 entry removed entirely → true physical deletion
+    subgraph "Later Compaction"
+        R2["TOMBSTONE fully propagated\n→ entry removed entirely\n→ true physical deletion ✅"]
+    end
+    R -->|"safe to remove"| R2
 ```
 
 ---
 
-## 12. Complete Read & Write Flow
+## 12. Full Read & Write Flow
 
 ### Write Flow
 
@@ -871,44 +880,44 @@ sequenceDiagram
     participant WAL as Backup WAL (Disk)
     participant MT as MemTable (RAM, BBST)
     participant SST as SSTables (Disk)
-    participant BG as Compaction Process (Background)
+    participant BG as Background Compaction
 
     C->>WAL: 1. Append write (crash insurance)
     C->>MT: 2. Insert/update key in BBST
-    MT-->>C: 3. ACK ✅
+    MT-->>C: 3. ACK ✅ (ultra fast — all in RAM)
 
     Note over MT: MemTable full (~100 MB)...
     MT->>SST: 4. In-order flush → new sorted SSTable
-    WAL->>WAL: 5. Delete Backup WAL (data safe on disk)
-    MT->>MT: 6. Clear MemTable (reset BBST)
+    WAL->>WAL: 5. Delete Backup WAL
+    MT->>MT: 6. Reset (clear BBST)
 
-    Note over BG: Background compaction...
-    BG->>SST: 7. Merge older SSTables (merge sort)
-    BG->>SST: 8. Keep latest values, discard duplicates
-    BG->>SST: 9. Delete merged input SSTables
+    Note over BG: Background loop...
+    BG->>SST: 7. Merge-sort older SSTables
+    BG->>SST: 8. Keep latest values, remove duplicates
+    BG->>SST: 9. Delete old SSTables
 ```
 
 ### Read Flow
 
 ```mermaid
 flowchart TD
-    Start["🔍 Read: key=X"] --> MT{Check MemTable?}
+    Start["🔍 Read: key=X"] --> MT{"Check MemTable\n(RAM, BBST)"}
 
-    MT -->|"Found"| HIT["✅ Return from RAM\nZero disk access"]
+    MT -->|"Found"| HIT["✅ Return from RAM\nZero disk access\nMicroseconds"]
     MT -->|"Not found"| LOOP["For each SSTable\n(newest → oldest)"]
 
-    LOOP --> BF{Check Bloom Filter\nfor this SSTable}
-    BF -->|"Definite NO"| NEXT["⏭ Skip this SSTable\nno disk seek needed"]
-    BF -->|"Maybe YES"| SI["Binary search\nSparse Index (in RAM)"]
+    LOOP --> BF{"Bloom Filter\nfor this SSTable"}
+    BF -->|"Definite NO\n(any bit = 0)"| NEXT["⏭ Skip SSTable\nno disk seek!"]
+    BF -->|"Maybe YES\n(all bits = 1)"| SI["Binary search\nSparse Index (RAM)"]
 
-    SI --> SEEK["One disk seek →\nRead 64 KB block"]
-    SEEK --> BS{Binary search\nwithin 64 KB block}
+    SI --> SEEK["💾 One disk seek\n→ Read 64 KB block"]
+    SEEK --> BS{"Binary search\n64 KB block (RAM)"}
 
     BS -->|"Found value"| FOUND["✅ Return value"]
     BS -->|"Found TOMBSTONE"| DEL["Return: key deleted"]
     BS -->|"Not in this block"| NEXT
 
-    NEXT --> MORE{More SSTables?}
+    NEXT --> MORE{"More SSTables?"}
     MORE -->|"Yes"| LOOP
     MORE -->|"No"| NF["❌ Key does not exist"]
 ```
@@ -918,10 +927,11 @@ flowchart TD
 | Operation | Complexity | Detail |
 |---|---|---|
 | **Write** | **O(1)** | Append to backup WAL + BBST insert in MemTable |
-| **Read (hit MemTable)** | O(log N_mem) | BBST lookup — tiny structure, essentially free |
-| **Read (hit SSTable)** | O(log N) | Bloom filter → sparse index → 1 disk seek per SSTable |
-| **Read (key absent)** | Near O(1) | Bloom filter eliminates almost all SSTable checks |
+| **Read (hit MemTable)** | O(log N_mem) | BBST lookup — tiny structure, effectively O(1) |
+| **Read (hit SSTable)** | O(k) per SSTable × O(log N) SSTables | Bloom filter O(k) + sparse index + 1 disk seek |
+| **Read (key absent)** | Near O(1) | Bloom filter eliminates almost all SSTables |
 | **Delete** | O(1) | Write tombstone — same as a normal write |
+| **Insert + Lookup (Bloom)** | O(k) | Both operations only depend on k hash functions |
 
 ---
 
@@ -953,42 +963,49 @@ flowchart TD
 │                      │ Keeps latest value per key. Removes duplicates.   │
 │                      │ Critical to tune in production (timing, size).    │
 ├──────────────────────┼───────────────────────────────────────────────────┤
-│ Sparse Index         │ Per-SSTable in-memory index. Stores first key of  │
-│                      │ every 64 KB block. 1 GB SSTable → 1 MB index.    │
-│                      │ Enables: binary search sparse index → 1 disk seek │
+│ Sparse Index         │ Per-SSTable in-memory index. One entry per 64 KB  │
+│                      │ block. 1 GB SSTable → 1 MB index (1000× smaller).│
+│                      │ Enables 2-step binary search into SSTables.       │
 ├──────────────────────┼───────────────────────────────────────────────────┤
 │ Bloom Filter         │ Fixed-size bit array (M bits, K hash functions).  │
-│                      │ Zero false negatives. ~1% false positive rate.    │
-│                      │ 1 billion keys → 1 GB filter. Skips disk reads   │
-│                      │ for absent keys. Size NEVER grows on insert.      │
+│                      │ Zero false negatives. Tunable false positive rate. │
+│                      │ 1B keys → 1 GB filter at 1% FP. Size never grows.│
+│                      │ Time: O(k) for insert/lookup. Real DBs: RocksDB, │
+│                      │ Cassandra, ScyllaDB, SQLite, Chromium, Spark.     │
 ├──────────────────────┼───────────────────────────────────────────────────┤
 │ Tombstone            │ Special delete marker value.                      │
 │                      │ DELETE key → write(key, TOMBSTONE).               │
-│                      │ Needed because: SSTable is immutable,             │
+│                      │ Needed because: SSTable is immutable +            │
 │                      │ Bloom Filter never forgets.                       │
 │                      │ Physically removed during later compaction.       │
-└──────────────────────┴───────────────────────────────────────────────────┘
+└──────────────────────┴──────────────────────────────────────────────────┘
 ```
 
-### Databases That Use LSM Trees (mentioned in lecture)
+### Databases That Use LSM Trees
 
 | Database | LSM Tree | WAL | Bloom Filter | Notes |
 |---|---|---|---|---|
 | **Apache Cassandra** | ✅ | ✅ | ✅ | Compaction tuning is critical |
 | **Amazon DynamoDB** | ✅ | ✅ | ✅ | AWS managed, auto-scaling |
-| **RocksDB** | ✅ | ✅ | ✅ | Embedded engine, used inside many DBs |
-| **LevelDB** | ✅ | ✅ | ✅ | Google-built library |
-| **HBase** | ✅ | ✅ | ✅ | Hadoop ecosystem (Google BigTable inspired) |
-| **ScyllaDB** | ✅ | ✅ | ✅ | Cassandra-compatible |
-| **SQLite** | ✅ (optional) | ✅ | — | WAL mode for write speed improvement |
+| **RocksDB** | ✅ | ✅ | ✅ | Embedded engine used inside MySQL, etc. |
+| **LevelDB** | ✅ | ✅ | ✅ | Google-built open-source library |
+| **HBase** | ✅ | ✅ | ✅ | Hadoop ecosystem, BigTable-inspired |
+| **ScyllaDB** | ✅ | ✅ | ✅ (MurmurHash) | Cassandra-compatible, C++ rewrite |
+| **SQLite** | WAL mode | ✅ | Internal | WAL mode for improved write speed |
+| **Apache Spark** | — | — | ✅ | BloomFilterImpl for query optimization |
 
 ---
 
 > 📚 **Related Topics:**
 > - [SQL vs NoSQL Ultimate Guide](../SQL%20vs%20NoSQL/SQL_vs_NoSQL_Ultimate_Guide.md)
+> - **External Resources:**
+>   - [Bloom Filters by Example](https://llimllib.github.io/bloomfilter-tutorial/) — interactive tutorial
+>   - [Bloom Filter Calculator](https://hur.st/bloomfilter/) — tune n, m, k, p
+>   - [Wikipedia — Bloom Filter](https://en.wikipedia.org/wiki/Bloom_filter) — comprehensive reference
 > - **Assignment from this class:** Bloom Filter implementation
 > - **Next class:** Case Study — Designing a Messaging App
 
 ---
 
 *Notes based on Scaler HLD Class 11 — [YouTube: HLD Multi Master 11](https://youtu.be/qSMB6nUloNE)*
+*Additional content from: [llimllib.github.io/bloomfilter-tutorial](https://llimllib.github.io/bloomfilter-tutorial/) and [hur.st/bloomfilter](https://hur.st/bloomfilter/)*
