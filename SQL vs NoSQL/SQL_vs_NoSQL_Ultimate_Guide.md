@@ -576,12 +576,13 @@ The CAP Theorem states that a distributed database can guarantee only **two out 
                        ╱      │      ╲
                       ╱       │       ╲
                      ╱========●========╲
-                    ╱    MongoDB     Cassandra
-                   ╱     HBase      DynamoDB
-                  ╱  Redis Cluster    CouchDB
+                    ╱    MongoDB       Cassandra
+                   ╱     HBase          DynamoDB
+                  ╱    Redis Cluster      CouchDB
                  ╱                          ╲
                 ╱____________________________╲
-        Consistency                   Availability
+        Consistency                     Availability
+                      
                       Partition Tolerance
                       (Always Present!)
 
