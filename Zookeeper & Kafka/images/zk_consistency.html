@@ -267,5 +267,21 @@ body {
   </div>
 
 </div>
+<script>
+  function scaleToFit() {
+    const canvas = document.querySelector('.canvas');
+    if (!canvas) return;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const scaleX = windowWidth / 1400;
+    const scaleY = windowHeight / 880;
+    // use a little padding factor so it fits comfortably
+    let scale = Math.min(scaleX, scaleY) * 0.95; 
+    if (scale > 1) scale = 1; // max scale 1
+    canvas.style.transform = `scale(${scale})`;
+  }
+  window.addEventListener('resize', scaleToFit);
+  scaleToFit();
+</script>
 </body>
 </html>
