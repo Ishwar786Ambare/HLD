@@ -9,14 +9,14 @@
 # 🤖 Generative AI — Complete Study Notes
 
 > 📝 **Compiled by:** [Ishwar Ambare](https://www.linkedin.com/in/ishwar-ambare/)
-> 🎓 **Source:** Scalar GenAI Basics Module — Classes 1 to 4
+> 🎓 **Source:** Generative AI Basics Module
 > 👨‍🏫 **Instructor:** Shivank (Head of Data Science, Scale | Ex-Microsoft, Oracle)
 
 ---
 
 ## 📑 Full Table of Contents
 
-### 🗂️ Part 1 — GenAI Introduction & Landscape (Class 1)
+### 🗂️ Part 1 — GenAI Introduction & Landscape
 1. [Why Generative AI? The Buzz](#1-why-generative-ai-the-buzz)
 2. [What is Generative AI?](#2-what-is-generative-ai)
 3. [GenAI Technology Stack](#3-genai-technology-stack)
@@ -24,9 +24,9 @@
 5. [AI Hierarchy](#5-ai-hierarchy)
 6. [Industry Applications](#6-industry-applications)
 7. [Market Reports & Economic Impact](#7-market-reports--economic-impact)
-8. [Key Takeaways — Class 1](#8-key-takeaways--class-1)
+8. [Key Takeaways](#8-key-takeaways)
 
-### 🗂️ Part 2 — Prerequisites & API Basics (Class 2)
+### 🗂️ Part 2 — Prerequisites & API Basics
 9. [Python Libraries — The "Why"](#9-python-libraries--the-why)
 10. [Machine Learning — Predictions on Table Data](#10-machine-learning--predictions-on-table-data)
 11. [Deep Learning — Predictions on Images/Audio/Video](#11-deep-learning--predictions-on-imagesaudiovideo)
@@ -36,9 +36,9 @@
 15. [Pricing Model & Tokens](#15-pricing-model--tokens)
 16. [Hands-On: First API Calls](#16-hands-on-first-api-calls)
 17. [Key Parameters Explained](#17-key-parameters-explained)
-18. [Key Takeaways — Class 2](#18-key-takeaways--class-2)
+18. [Key Takeaways](#18-key-takeaways)
 
-### 🗂️ Part 3 — Prompt Engineering (Classes 3 & 4)
+### 🗂️ Part 3 — Prompt Engineering
 19. [Dynamic Prompt Templates with `.format()`](#19-dynamic-prompt-templates-with-format)
 20. [Case Study 1 — Financial Document Q&A (Asian Paints)](#20-case-study-1--financial-document-qa-asian-paints)
 21. [Case Study 2 — Few-Shot Prompting & Conversational AI (Math Tutor)](#21-case-study-2--few-shot-prompting--conversational-ai-math-tutor)
@@ -47,12 +47,12 @@
 24. [Homework — Wikipedia Q&A Bot](#24-homework--wikipedia-qa-bot)
 25. [Rate Limiting & Exponential Backoff](#25-rate-limiting--exponential-backoff)
 26. [Open-Source LLMs via Hugging Face (LLaMA)](#26-open-source-llms-via-hugging-face-llama)
-27. [Key Takeaways — Classes 3 & 4](#27-key-takeaways--classes-3--4)
+27. [Key Takeaways](#27-key-takeaways)
 
 ---
 
 # 🗂️ PART 1 — GenAI Introduction & Landscape
-> **Class 1** | Source: [YouTube Transcript](https://youtu.be/Pz9pUmfDQjU)
+> **Topic:** Introduction & Landscape | Source: [YouTube Transcript](https://youtu.be/Pz9pUmfDQjU)
 
 ---
 
@@ -307,7 +307,7 @@ Used when you have a **chain of LLM tasks** (one output feeds the next):
 
 ---
 
-## 8. Key Takeaways — Class 1
+## 8. Key Takeaways
 
 ### 🎯 Core Insights
 - GenAI is **not a trend** — it's the next **foundational technology** (like the internet)
@@ -339,7 +339,7 @@ LLM Fine-tuning, RAG, Vector DBs, Deployment
 Build → Ship → Fund 🚀
 ```
 
-### 📚 Resources — Class 1
+### 📚 Resources
 | Resource | Link |
 |---|---|
 | ChatGPT | https://chat.openai.com |
@@ -358,7 +358,7 @@ Build → Ship → Fund 🚀
 ---
 
 # 🗂️ PART 2 — Prerequisites & API Basics
-> **Class 2** | Colab: [Class 2 Notebook](https://colab.research.google.com/drive/1UB0vlbFbZnqBhPlPRqbNDHW0uAlU6n1F?usp=sharing)
+> **Topic:** Prerequisites & API Basics | Colab: [Reference Notebook](https://colab.research.google.com/drive/1UB0vlbFbZnqBhPlPRqbNDHW0uAlU6n1F?usp=sharing)
 
 ---
 
@@ -697,7 +697,7 @@ Use low penalty:   technical terms MUST repeat (e.g., "gradient descent")
 
 ---
 
-## 18. Key Takeaways — Class 2
+## 18. Key Takeaways
 
 ### 🏗️ Prerequisites Summary
 ```
@@ -719,20 +719,20 @@ Python Basics
 | Use case | Quick queries | Build products, pipelines, apps |
 | Customization | None | System roles, parameters, JSON output |
 
-### 📚 Resources — Class 2
+### 📚 Resources
 | Resource | Link |
 |---|---|
 | OpenAI Platform | https://platform.openai.com |
 | OpenAI API Docs | https://platform.openai.com/docs |
 | Token Visualizer | https://platform.openai.com/tokenizer |
 | "Attention is All You Need" | https://arxiv.org/abs/1706.03762 |
-| Class 2 Colab Notebook | https://colab.research.google.com/drive/1UB0vlbFbZnqBhPlPRqbNDHW0uAlU6n1F |
+| Reference Colab Notebook | https://colab.research.google.com/drive/1UB0vlbFbZnqBhPlPRqbNDHW0uAlU6n1F |
 | OpenAI Usage Dashboard | https://platform.openai.com/usage |
 
 ---
 
 # 🗂️ PART 3 — Prompt Engineering
-> **Classes 3 & 4**
+> **Topic:** Prompt Engineering
 
 ---
 
@@ -1381,7 +1381,7 @@ print(result)
 
 ---
 
-## 27. Key Takeaways — Classes 3 & 4
+## 27. Key Takeaways
 
 ### 🏗️ Prompt Engineering Core Principles
 
@@ -1420,7 +1420,7 @@ Same pattern applies to:
   - Legal contract review
 ```
 
-### 📚 Resources — Classes 3 & 4
+### 📚 Resources
 | Resource | Link |
 |---|---|
 | Screener.in (company financials) | https://www.screener.in |
@@ -1436,10 +1436,11 @@ Same pattern applies to:
 
 ## 🔗 About the Author
 
-> These notes were compiled by **Ishwar Ambare** as part of a personal learning journey through the Scalar GenAI Basics Module.
+> These notes were compiled by **Ishwar Ambare** as part of a personal learning journey through the Generative AI Basics Module.
 >
-> 📌 **LinkedIn:** [linkedin.com/in/ishwar-ambare](https://www.linkedin.com/in/ishwar-ambare/)
+> 📌 **Follow me on LinkedIn:** [linkedin.com/in/ishwar-ambare](https://www.linkedin.com/in/ishwar-ambare/)  
+> ✍️ **Read my articles on Medium:** [medium.com/@ishwarambare](https://medium.com/@ishwarambare)
+>
+> ---
 
----
-
-*Generative AI Complete Notes — Classes 1 to 4 | Scalar GenAI Basics Module*
+*Generative AI Complete Notes | Basics Module*
