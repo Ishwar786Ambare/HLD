@@ -52,7 +52,7 @@
 ---
 
 # 🗂️ PART 1 — GenAI Introduction & Landscape
-> **Topic:** Introduction & Landscape | Source: [YouTube Transcript](https://youtu.be/Pz9pUmfDQjU)
+> **Topic:** Introduction & Landscape
 
 ---
 
@@ -395,7 +395,7 @@ Build → Ship → Fund 🚀
 ---
 
 # 🗂️ PART 2 — Prerequisites & API Basics
-> **Topic:** Prerequisites & API Basics | Colab: [Reference Notebook](https://colab.research.google.com/drive/1UB0vlbFbZnqBhPlPRqbNDHW0uAlU6n1F?usp=sharing)
+> **Topic:** Prerequisites & API Basics
 
 ---
 
