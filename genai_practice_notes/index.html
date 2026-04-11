@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GenAI Practice Sessions – ChatGPT for Data Science</title>
+  <meta name="description" content="Structured notes from GenAI practice sessions covering ChatGPT prompting, Python automation, and NumPy/Pandas data analysis techniques." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary: #0a0d1a;
+      --bg-secondary: #0f1525;
+      --bg-card: #131929;
+      --bg-card-hover: #1a2235;
+      --accent-purple: #7c3aed;
+      --accent-purple-light: #a78bfa;
+      --accent-cyan: #06b6d4;
+      --accent-cyan-light: #67e8f9;
+      --accent-emerald: #10b981;
+      --accent-emerald-light: #6ee7b7;
+      --accent-amber: #f59e0b;
+      --accent-amber-light: #fcd34d;
+      --accent-rose: #f43f5e;
+      --accent-rose-light: #fda4af;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #1e2d45;
+      --border-glow: rgba(124, 58, 237, 0.3);
+      --gradient-hero: linear-gradient(135deg, #0a0d1a 0%, #121836 50%, #0d1a2e 100%);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 3px; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10, 13, 26, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo {
+      font-size: 1.1rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-purple-light), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      color: var(--text-secondary); text-decoration: none;
+      font-size: 0.875rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent-purple-light); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      background: var(--gradient-hero);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 2rem 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 50%, rgba(124,58,237,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 50%, rgba(6,182,212,0.1) 0%, transparent 60%);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.4);
+      border-radius: 100px; padding: 0.4rem 1rem;
+      font-size: 0.8rem; font-weight: 600; color: var(--accent-purple-light);
+      margin-bottom: 1.5rem; letter-spacing: 0.05em;
+      animation: fadeInDown 0.6s ease both;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 800; line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      animation: fadeInUp 0.7s ease 0.1s both;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent-purple-light) 0%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      max-width: 620px; color: var(--text-secondary);
+      font-size: 1.1rem; margin-bottom: 2.5rem;
+      animation: fadeInUp 0.7s ease 0.2s both;
+    }
+    .hero-stats {
+      display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap;
+      animation: fadeInUp 0.7s ease 0.3s both;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* ── Section ── */
+    .section {
+      padding: 5rem 2rem;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--accent-purple-light);
+      margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 800; letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+    .section-desc {
+      color: var(--text-secondary); max-width: 580px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── Lecture Tabs ── */
+    .tab-container { margin-bottom: 2rem; }
+    .tabs {
+      display: inline-flex; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 4px; gap: 4px;
+    }
+    .tab-btn {
+      padding: 0.5rem 1.5rem; border-radius: 8px;
+      border: none; background: transparent;
+      color: var(--text-secondary); cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--accent-purple);
+      color: white;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+    .tab-btn:hover:not(.active) { color: var(--text-primary); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeInUp 0.35s ease; }
+
+    /* ── Grid ── */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem;
+      transition: all 0.25s ease;
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; inset: 0;
+      border-radius: 16px; opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .card:hover { background: var(--bg-card-hover); transform: translateY(-3px); border-color: var(--border-glow); }
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 1rem;
+    }
+    .icon-purple { background: rgba(124,58,237,0.2); }
+    .icon-cyan { background: rgba(6,182,212,0.2); }
+    .icon-emerald { background: rgba(16,185,129,0.2); }
+    .icon-amber { background: rgba(245,158,11,0.2); }
+    .icon-rose { background: rgba(244,63,94,0.2); }
+
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .card p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.65; }
+
+    /* ── Prompt Box ── */
+    .prompt-block {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-purple);
+      border-radius: 12px; padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .prompt-label {
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--accent-purple-light);
+      margin-bottom: 0.5rem;
+    }
+    .prompt-text {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.845rem; color: var(--text-primary);
+      line-height: 1.7; white-space: pre-wrap;
+    }
+    .prompt-text em { color: var(--accent-cyan); font-style: normal; }
+    .prompt-text strong { color: var(--accent-amber); font-weight: 500; }
+
+    /* ── Code Block ── */
+    .code-block {
+      background: #080d1f;
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.25rem;
+      margin: 1rem 0;
+      position: relative;
+    }
+    .code-block pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.83rem; color: #c9d1d9;
+      overflow-x: auto; line-height: 1.65;
+    }
+    .code-tag {
+      position: absolute; top: 0.6rem; right: 0.75rem;
+      font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    /* ── Step Flow ── */
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex; gap: 1.25rem;
+      position: relative; padding-bottom: 2rem;
+    }
+    .step:last-child { padding-bottom: 0; }
+    .step-line {
+      position: absolute; left: 19px; top: 40px; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent-purple), transparent);
+    }
+    .step:last-child .step-line { display: none; }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(124,58,237,0.2);
+      border: 2px solid var(--accent-purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: var(--accent-purple-light);
+      flex-shrink: 0;
+    }
+    .step-content { flex: 1; padding-top: 0.4rem; }
+    .step-content h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .step-content p { font-size: 0.875rem; color: var(--text-secondary); }
+
+    /* ── Tip Box ── */
+    .tip-box {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 12px; padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+    }
+    .tip-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .tip-text { font-size: 0.875rem; color: var(--text-secondary); }
+    .tip-text strong { color: var(--accent-emerald-light); }
+
+    .warn-box {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 12px; padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+    }
+    .warn-text { font-size: 0.875rem; color: var(--text-secondary); }
+    .warn-text strong { color: var(--accent-amber-light); }
+
+    /* ── Tag Chips ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    .chip {
+      padding: 0.25rem 0.75rem; border-radius: 100px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+    .chip-purple { background: rgba(124,58,237,0.2); color: var(--accent-purple-light); border: 1px solid rgba(124,58,237,0.3); }
+    .chip-cyan { background: rgba(6,182,212,0.2); color: var(--accent-cyan-light); border: 1px solid rgba(6,182,212,0.3); }
+    .chip-emerald { background: rgba(16,185,129,0.2); color: var(--accent-emerald-light); border: 1px solid rgba(16,185,129,0.3); }
+    .chip-amber { background: rgba(245,158,11,0.2); color: var(--accent-amber-light); border: 1px solid rgba(245,158,11,0.3); }
+
+    /* ── Timeline ── */
+    .timeline-section { border-left: 2px solid var(--border); padding-left: 2rem; margin: 2rem 0; }
+    .timeline-item { position: relative; margin-bottom: 2rem; }
+    .timeline-item::before {
+      content: ''; position: absolute;
+      left: -2.5rem; top: 0.35rem;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent-purple);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+    }
+    .timeline-item h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .timeline-item p { font-size: 0.875rem; color: var(--text-secondary); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th {
+      background: var(--bg-card); color: var(--text-secondary);
+      font-weight: 600; text-transform: uppercase;
+      font-size: 0.72rem; letter-spacing: 0.08em;
+      padding: 0.85rem 1rem; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(30, 45, 69, 0.5);
+      color: var(--text-secondary);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-card); }
+    td:first-child { color: var(--text-primary); font-weight: 500; }
+
+    /* ── Key Takeaway ── */
+    .takeaway {
+      background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(6,182,212,0.08) 100%);
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: 16px; padding: 2rem;
+      text-align: center; margin: 2rem 0;
+    }
+    .takeaway h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .takeaway p { color: var(--text-secondary); max-width: 540px; margin: 0 auto; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center; padding: 2rem;
+      color: var(--text-muted); font-size: 0.8rem;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-15px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⚡ GenAI Practice Notes</div>
+  <div class="nav-links">
+    <a href="#lectures">Lectures</a>
+    <a href="#prompts">Prompts</a>
+    <a href="#exercises">Exercises</a>
+    <a href="#tips">Tips</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🎓 Practice Sessions – Lectures 1 &amp; 2</div>
+  <h1>Using <span>ChatGPT</span> for<br/>Data Science &amp; Python</h1>
+  <p>Structured notes from both GenAI practice sessions — covering smart prompting, Python automation, and NumPy/Pandas data analysis with AI assistance.</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-number">2</div>
+      <div class="stat-label">Lectures</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">10+</div>
+      <div class="stat-label">Exercises</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">5</div>
+      <div class="stat-label">Prompt Techniques</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">∞</div>
+      <div class="stat-label">Possibilities</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN LECTURES SECTION -->
+<section class="section" id="lectures">
+  <div class="section-label">Content</div>
+  <h2 class="section-title">Both Lecture Sessions</h2>
+  <p class="section-desc">Switch between lectures to explore what was covered in each session.</p>
+
+  <div class="tab-container">
+    <div class="tabs">
+      <button class="tab-btn active" id="tab1-btn" onclick="switchTab(1)">📘 Lecture 1 – GPT Basics + Python</button>
+      <button class="tab-btn" id="tab2-btn" onclick="switchTab(2)">📗 Lecture 2 – NumPy/Pandas + Case Study</button>
+    </div>
+  </div>
+
+  <!-- LECTURE 1 -->
+  <div class="tab-panel active" id="tab1">
+    <h3 style="font-size:1.3rem; font-weight:700; margin-bottom:1.5rem; color: var(--accent-purple-light);">🎯 Lecture 1 — ChatGPT for Everyday Coding</h3>
+
+    <div class="warn-box">
+      <div class="tip-icon">⚠️</div>
+      <div class="warn-text"><strong>Key Disclaimer:</strong> Don't become overdependent on GPT — it will help you at work and in take-home assignments but will <em>not</em> help in live coding interviews. You still need to learn Python fundamentals!</div>
+    </div>
+
+    <h4 style="margin-bottom:1rem; color: var(--text-secondary); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em;">SESSION OVERVIEW</h4>
+    <div class="grid-3" style="margin-bottom:2rem;">
+      <div class="card">
+        <div class="card-icon icon-purple">🤖</div>
+        <h3>Prompting Fundamentals</h3>
+        <p>How to write clear, effective prompts. Fill-in-the-blank style, one-word answers, few-shot examples, and persona prompting.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-cyan">🐍</div>
+        <h3>Python File Automation</h3>
+        <p>Using GPT to write Python scripts for file manipulation: uppercase conversion, merging files, creating ZIP archives.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-emerald">📊</div>
+        <h3>Web App with Streamlit</h3>
+        <p>Creating interactive histograms and bar charts from CSV data using Streamlit — without knowing Streamlit at all!</p>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- PROMPTING TECHNIQUES -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.25rem;" id="prompts">🔧 Prompting Techniques Covered</h3>
+
+    <div class="grid-2">
+      <div>
+        <div class="prompt-block">
+          <div class="prompt-label">Technique 1 — Fill in the Blank</div>
+          <div class="prompt-text">The process of deriving insights from data is called <em>...</em></div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <div class="tip-text">Leaving the sentence incomplete with <strong>...</strong> or <strong>?</strong> signals GPT to complete the thought rather than give a long explanation.</div>
+        </div>
+      </div>
+      <div>
+        <div class="prompt-block">
+          <div class="prompt-label">Technique 2 — One-Word / Constrained Answer</div>
+          <div class="prompt-text">Using the example complete the request:
+
+Q: What is the most popular language for data analysis?
+A: Python
+
+Q: What is the most popular data file format for data analysis?
+A: <em>?</em></div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <div class="tip-text">Providing an <strong>example Q&amp;A pair</strong> (few-shot prompting) teaches GPT the exact format you want — no extra explanation needed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1.25rem;">
+      <div>
+        <div class="prompt-block">
+          <div class="prompt-label">Technique 3 — Persona Prompting</div>
+          <div class="prompt-text">You are <em>Shakespeare</em>.
+What is data analysis?</div>
+        </div>
+        <p style="font-size:0.875rem; color:var(--text-secondary);">GPT answers in Shakespeare's style but still gives the correct answer. Use for presentations to non-technical stakeholders — give GPT the stakeholder's persona (e.g., "You are a CEO of an e-commerce shoe company") and ask it to explain your topic from their perspective.</p>
+      </div>
+      <div>
+        <div class="prompt-block">
+          <div class="prompt-label">Technique 4 — Let GPT Ask Questions First</div>
+          <div class="prompt-text">I want a high-level overview of data analysis.
+I haven't done this before and don't know the terminology.
+<em>Ask me as many questions as you need</em>, then give me a relevant answer.</div>
+        </div>
+        <p style="font-size:0.875rem; color:var(--text-secondary);">GPT will first ask about your background, data sources, tools, challenges — then tailor its explanation perfectly to you.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:1.25rem;">
+      <div class="prompt-block">
+        <div class="prompt-label">Technique 5 — Explain Like I'm 10</div>
+        <div class="prompt-text">What is data analysis? <em>Explain like to a 10-year-old.</em></div>
+      </div>
+      <p style="font-size:0.875rem; color:var(--text-secondary);">Perfect for creating presentations for mixed audiences (sales, marketing, tech, management) — everyone can follow the explanation regardless of technical background.</p>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- FREE TOKENS TRICK -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">🆓 Free Token Limit Hack</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Hit the token limit?</h4>
+          <p>ChatGPT free tier has a per-period token limit. Once exhausted, you'll see a limit message.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Log out &amp; Log in with another Gmail</h4>
+          <p>Gmail doesn't restrict the number of accounts — create additional Gmail accounts and keep using ChatGPT free. After 24 hours, originals reset too.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Only pay when going to production</h4>
+          <p>For personal projects, learning, and internal tools at work — the free tier is perfectly sufficient. Pay only when you need production-grade API automation.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- PYTHON EXERCISES -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.25rem;" id="exercises">🐍 Python Exercises Done in Thonny (Thanos 😄)</h3>
+    <div class="timeline-section">
+      <div class="timeline-item">
+        <h4>Exercise 1 — Uppercase First Letter of Every Sentence</h4>
+        <p>Problem: Three .txt files had all sentences starting with lowercase. <br/>Solution: GPT-generated Python script using regex to capitalize the first letter after every full stop.</p>
+        <div class="chips">
+          <span class="chip chip-purple">File I/O</span>
+          <span class="chip chip-cyan">regex</span>
+          <span class="chip chip-emerald">String manipulation</span>
+        </div>
+        <div class="prompt-block" style="margin-top:0.75rem;">
+          <div class="prompt-label">Prompt Used</div>
+          <div class="prompt-text">I have multiple text files in a folder named <em>files</em>. Each text file contains text but the sentences start with a lowercase character. I want to convert the first letter of each sentence of each file to uppercase. <strong>Write me a Python script for that.</strong></div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <h4>Exercise 2 — Merge All .txt Files into One</h4>
+        <p>Merged badger.txt, hippo.txt, and rhino.txt into a single merge.txt file via GPT-generated script.</p>
+        <div class="chips">
+          <span class="chip chip-purple">File merging</span>
+          <span class="chip chip-cyan">pandas</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <h4>Exercise 3 — Create 100 Files with Indian Girl Names (Class Exercise)</h4>
+        <p>Generate 100 .txt files, each named file_N.txt containing a unique Indian girl name. GPT provided names automatically plus file creation code.</p>
+        <div class="prompt-block" style="margin-top:0.75rem;">
+          <div class="prompt-label">Sample Prompt</div>
+          <div class="prompt-text">I want to create <em>100 text files</em>. Each text file should contain a <em>different Indian girl name</em>. Write a Python script for that.</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <h4>Exercise 4 — Add Annual Salary Column to Excel Files</h4>
+        <p>3 Excel files had Employee + Monthly Salary columns. GPT added an Annual Salary column (monthly × 12) using pandas + openpyxl.</p>
+        <div class="chips">
+          <span class="chip chip-amber">pandas</span>
+          <span class="chip chip-cyan">openpyxl</span>
+          <span class="chip chip-emerald">Excel automation</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <h4>Exercise 5 — Merge Excel Files</h4>
+        <p>Combined all 3 processed Excel files into one using pandas. Handled "Excel format cannot be determined" error by asking GPT to fix it — learned to paste error messages back to GPT.</p>
+        <div class="tip-box" style="margin-top:0.75rem;">
+          <div class="tip-icon">🔄</div>
+          <div class="tip-text"><strong>Key skill:</strong> Copy the error message, paste it back to GPT and say "I am getting below error — rewrite the Python script." GPT will fix it automatically.</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <h4>Exercise 6 — Divide Column Values by 10 (CSV)</h4>
+        <p>sherlock_home.csv had a TG (temperature) column in tenths. GPT wrote a script to divide TG by 10 and save as sherlock_home_modified.csv.</p>
+      </div>
+
+      <div class="timeline-item">
+        <h4>Exercise 7 — ZIP Files in Batches of 10</h4>
+        <p>400 text files needed to be zipped in groups: 1–10 into zip1, 11–20 into zip2, etc. GPT generated the grouping + zipping logic automatically.</p>
+      </div>
+
+      <div class="timeline-item">
+        <h4>Exercise 8 — Streamlit Histogram from CSV</h4>
+        <p>Created an interactive browser-based histogram of the TG (temperature) column using Streamlit — without learning Streamlit. Also built yearly temperature line chart and bar chart.</p>
+        <div class="code-block">
+          <span class="code-tag">Shell</span>
+          <pre>streamlit run p8.py</pre>
+        </div>
+        <div class="tip-box" style="margin-top:0.5rem;">
+          <div class="tip-icon">🖥️</div>
+          <div class="tip-text"><strong>Thonny trick:</strong> Streamlit can't run via the normal Run button. Go to <strong>Tools → Open System Shell</strong> and run <code>streamlit run filename.py</code> there.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOL NOTE -->
+    <div class="takeaway">
+      <h3>🔨 Tool Used: Thonny (aka "Thanos")</h3>
+      <p>A simple Python IDE. Install via thonny.org. For missing packages like pandas or streamlit, go to <strong>Tools → Manage Packages</strong>, search the package name, and click Install.</p>
+    </div>
+  </div>
+
+  <!-- LECTURE 2 -->
+  <div class="tab-panel" id="tab2">
+    <h3 style="font-size:1.3rem; font-weight:700; margin-bottom:1.5rem; color: var(--accent-emerald-light);">🎯 Lecture 2 — Advanced Prompting for NumPy/Pandas</h3>
+
+    <div class="tip-box">
+      <div class="tip-icon">📋</div>
+      <div class="tip-text"><strong>Goal of this session:</strong> Learn how GPT can accelerate NumPy/Pandas data analysis — not replace your knowledge, but make you <em>significantly faster</em>. A task that takes a day can now take 4–5 hours.</div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:2rem; margin-top:1rem;">
+      <div class="card">
+        <div class="card-icon icon-purple">📝</div>
+        <h3>Survey Data Case Study</h3>
+        <p>Scalar's GenAI course launch survey — understanding respondent profiles, skill levels, and interest in a new AI course.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-emerald">🏷️</div>
+        <h3>Categorical Encoding</h3>
+        <p>Using GPT to identify encoding types (ordinal vs. nominal), fix GPT mistakes, and generate a full encoding schema in JSON format.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-amber">🛒</div>
+        <h3>E-Commerce Churn</h3>
+        <p>Kaggle problem: predicting customer churn from an electronics store's event logs without an explicit churn column.</p>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- CASE STUDY 1 -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.25rem;">📊 Case Study 1: Categorical Encoding (Survey Data)</h3>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Establish Persona &amp; Share Data Snippet</h4>
+          <p>Start with a role prompt and paste a chunk of your CSV (column names + first few rows). This is critical — without data context, GPT's answers are generic.</p>
+          <div class="prompt-block" style="margin-top:0.5rem;">
+            <div class="prompt-label">Prompt Structure</div>
+            <div class="prompt-text">You are a professional data analyst with <em>20 years of experience</em> in cutting-edge technology.
+
+I have a data file called [filename] with responses to a survey on GenAI...
+
+Here is a chunk of that file:
+<strong>[paste column names + first 2–3 rows of actual data]</strong>
+
+After reading this, show me the list of all categorical variables from the dataset.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Remove Irrelevant Columns</h4>
+          <p>Ask GPT to remove columns like respondent_id or IP address that add no analytical value.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Get Unique Values for Each Categorical Column</h4>
+          <p>Ask GPT to generate a Python script that outputs each categorical column's unique values. Run it in Google Colab, then paste the output back to GPT.</p>
+          <div class="prompt-block" style="margin-top:0.5rem;">
+            <div class="prompt-label">Prompt</div>
+            <div class="prompt-text">Create a Python script that will output all these variables with the list of unique values <em>in a format that I can easily copy-paste back here</em>.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Build Encoding Table</h4>
+          <p>Ask GPT to create a two-column table: Variable Name | Suggested Encoding Method. Review it — GPT often makes mistakes here!</p>
+          <div class="warn-box" style="margin-top:0.5rem;">
+            <div class="tip-icon">⚠️</div>
+            <div class="warn-text"><strong>GPT is not always right on encoding!</strong> Use your analyst knowledge to verify. For example, "prefer not to say" should get a <em>negative/lowest</em> weight, not the highest ordinal value.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>Correct GPT's Mistakes Explicitly</h4>
+          <div class="prompt-block" style="margin-top:0.5rem;">
+            <div class="prompt-label">Correction Prompt</div>
+            <div class="prompt-text">Update the table with the following changes:
+- Consider <em>age</em> as ordinal column
+- Consider <em>gender</em> as nominal column
+- For <em>prefer not to say</em> and <em>others</em>, assign negative value (e.g. -1) as they should have <strong>lowest weight</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <h4>Add Encoded Value Examples Column</h4>
+          <p>Add a third column showing actual old → new value mappings (e.g., "18–24" → 1, "25–35" → 2). Use few-shot examples from earlier columns to enforce the format.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <h4>Convert All to JSON</h4>
+          <div class="prompt-block" style="margin-top:0.5rem;">
+            <div class="prompt-label">Prompt</div>
+            <div class="prompt-text">Convert the above table to JSON format, leaving out the encoding method column. Output format example: <em>[paste format example]</em></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">8</div>
+        <div class="step-content">
+          <h4>Merge JSON Files &amp; Apply Encoding to CSV</h4>
+          <p>GPT writes a Python script to merge the JSON encoding files, then applies them to the original CSV — adding new <code>columnname_enc</code> columns right after their source column (in order).</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- CASE STUDY 2 -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.25rem;">🛒 Case Study 2: E-Commerce Churn Prediction</h3>
+
+    <div class="tip-box">
+      <div class="tip-icon">🎯</div>
+      <div class="tip-text"><strong>Dataset:</strong> Electronics store event logs (view, cart, purchase events). <strong>Challenge:</strong> No explicit churn column — GPT helps define what "churn" means!</div>
+    </div>
+
+    <div class="table-wrap" style="margin:1.25rem 0;">
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Description</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>event_time</td>
+            <td>When the event happened</td>
+            <td>Used to compute recency</td>
+          </tr>
+          <tr>
+            <td>event_type</td>
+            <td>view / cart / purchase / remove_from_cart</td>
+            <td>Core signal for engagement</td>
+          </tr>
+          <tr>
+            <td>product_id</td>
+            <td>Product identifier</td>
+            <td>Many-to-many with user_id</td>
+          </tr>
+          <tr>
+            <td>user_id</td>
+            <td>Customer identifier</td>
+            <td>Used for churn definition</td>
+          </tr>
+          <tr>
+            <td>user_session</td>
+            <td>Browser session key</td>
+            <td>Can contain multiple events</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:0.75rem;">Churn Definition (GPT-suggested)</h4>
+    <div class="prompt-block">
+      <div class="prompt-label">GPT's Suggestion (Accepted)</div>
+      <div class="prompt-text">A user is considered churned if they have <em>not made a purchase within the last 30 days</em> relative to the maximum date in the dataset.
+
+<strong>Instructor note:</strong> GPT takes the max date as reference (not each user's last date) for statistical consistency — ask GPT to explain its reasoning if confused!</div>
+    </div>
+
+    <h4 style="font-size:0.95rem; font-weight:700; margin:1.25rem 0 0.75rem;">Feature Engineering via GPT</h4>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-icon icon-cyan">🔮</div>
+        <h3>GPT-Proposed Features (Round 1)</h3>
+        <p>Recency of activity, frequency of activity, total purchases, unique products viewed, average session duration, cart abandonment rate, and more — 10 features at once.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-purple">🔮</div>
+        <h3>GPT-Proposed Features (Round 2)</h3>
+        <p>10 more creative features generated in the second prompt round with memory context refreshed — demonstrating how to handle GPT's short-term memory.</p>
+      </div>
+    </div>
+
+    <div class="prompt-block" style="margin-top:1.25rem;">
+      <div class="prompt-label">Advanced Feature Evaluation Prompt</div>
+      <div class="prompt-text">For each of the proposed features, evaluate their potential. Consider:
+- Pros and cons
+- <em>Initial implementation effort</em>
+- <em>Implementation difficulty</em>
+- Expected outcome
+- <strong>Assign a probability of success (%)</strong>
+- <strong>Assign a confidence interval</strong></div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-icon">🧹</div>
+      <div class="tip-text"><strong>Filter step:</strong> After getting probabilities, tell GPT: "Only keep features where confidence interval is high or probability of success is above 70%." GPT will filter the table automatically.</div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- MEMORY ISSUE -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">🧠 Handling GPT's Memory Problem</h3>
+    <div class="warn-box">
+      <div class="tip-icon">⚠️</div>
+      <div class="warn-text"><strong>GPT has short-term memory (like Ghajini!)</strong> In long conversations, it forgets earlier context. When this happens, re-establish context in your next prompt.</div>
+    </div>
+    <div class="prompt-block">
+      <div class="prompt-label">Memory-Refresh Prompt Pattern</div>
+      <div class="prompt-text">Let me repeat a few things for you because of memory constraints.
+
+I have a dataset [filename]. [Paste dataset description again]
+Here are the first few lines: [paste data chunk again]
+
+As part of our previous discussion, you already gave me the following ideas:
+<em>[paste the output from the previous step]</em>
+
+Now, [new question or next step]…</div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- DESCRIPTIVE ANALYSIS -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">📈 Descriptive Analysis Shortcut</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Ask GPT to write a describe() script</h4>
+          <p>GPT generates pandas df.describe() code. Run it in Google Colab.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Paste the output back to GPT</h4>
+          <div class="prompt-block" style="margin-top:0.4rem;">
+            <div class="prompt-label">Prompt</div>
+            <div class="prompt-text">Here is what I got: [paste describe() output]
+<em>Which insights can you derive from this?</em></div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Ask for more</h4>
+          <div class="prompt-block" style="margin-top:0.4rem;">
+            <div class="prompt-label">Follow-up</div>
+            <div class="prompt-text">Any more insight?</div>
+          </div>
+          <p style="margin-top:0.4rem;">GPT will keep generating additional observations about mean/median differences, distribution shapes, outliers, etc.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPS & BEST PRACTICES -->
+<div style="background:var(--bg-secondary); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:4rem 2rem;" id="tips">
+  <div style="max-width:1100px; margin:0 auto;">
+    <div class="section-label">Best Practices</div>
+    <h2 class="section-title">Golden Rules for Using GPT</h2>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon icon-emerald">✅</div>
+        <h3>Be Explicit &amp; Specific</h3>
+        <p>Always name your file/folder, describe the columns, and state the exact output format you want. Vague prompts → vague results.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-cyan">🔁</div>
+        <h3>Paste Errors Back</h3>
+        <p>When code throws an error, copy the full error message, paste it back to GPT, and say "Rewrite the script." GPT fixes most errors on the first try.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-purple">📋</div>
+        <h3>Give Sample Data</h3>
+        <p>For data analysis tasks, always paste 2–3 rows of your actual data. This dramatically improves the accuracy of GPT's code and insights.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-amber">🎭</div>
+        <h3>Use Few-Shot Prompting</h3>
+        <p>Provide one or two examples of the output format you want. GPT will match it exactly — this is the most reliable way to control output format.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-rose">🏷️</div>
+        <h3>Use Delimiters</h3>
+        <p>Use <code>###</code> or <code>---</code> to separate sections of your prompt (context from question). Helps GPT understand where the data ends and your request begins.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-emerald">🧠</div>
+        <h3>Verify GPT's Output</h3>
+        <p>GPT makes mistakes — especially in encoding type decisions and statistical reasoning. Use your domain knowledge to verify every suggestion before applying it.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL TAKEAWAY -->
+<section class="section">
+  <div class="takeaway">
+    <h3>🚀 The Big Picture</h3>
+    <p>GPT is not replacing you — it's making you 2–3× faster. A project that used to take a full day can now take 4–5 hours. The analysts who <em>know how to use GPT well</em> will outcompete those who don't. Learn the fundamentals, use GPT as your accelerator.</p>
+  </div>
+
+  <div class="grid-2" style="margin-top:2rem;">
+    <div class="card">
+      <h3>📌 Where GPT Helps</h3>
+      <div class="chips" style="margin-top:0.75rem;">
+        <span class="chip chip-emerald">Take-home assignments</span>
+        <span class="chip chip-emerald">Company projects</span>
+        <span class="chip chip-emerald">Boilerplate code</span>
+        <span class="chip chip-emerald">Data analysis speed</span>
+        <span class="chip chip-emerald">Feature engineering ideation</span>
+        <span class="chip chip-emerald">Presentation prep</span>
+        <span class="chip chip-emerald">Email &amp; appraisals</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>❌ Where GPT Doesn't Help</h3>
+      <div class="chips" style="margin-top:0.75rem;">
+        <span class="chip chip-rose">Live coding interviews</span>
+        <span class="chip chip-rose">DSA rounds</span>
+        <span class="chip chip-rose">Conceptual problem solving</span>
+        <span class="chip chip-amber">Companies that restrict AI tools</span>
+        <span class="chip chip-amber">Production systems (free tier)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>📘 GenAI Practice Sessions — Lectures 1 &amp; 2 &nbsp;|&nbsp; Notes compiled from session transcripts</p>
+  <p style="margin-top:0.5rem; color:var(--text-muted);">Keep practicing &nbsp;•&nbsp; Keep prompting &nbsp;•&nbsp; Keep learning</p>
+</footer>
+
+<script>
+  function switchTab(n) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab' + n).classList.add('active');
+    document.getElementById('tab' + n + '-btn').classList.add('active');
+  }
+</script>
+
+</body>
+</html>
